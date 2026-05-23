@@ -83,7 +83,7 @@ export default function Home() {
         {/* Bar Chart */}
         <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
           <h2 style={{ fontSize: '1.1rem', margin: '0 0 1.5rem 0', color: 'var(--text-main)' }}>{t('salesLast6Months')}</h2>
-          <div style={{ flex: 1, minHeight: '300px' }} dir="ltr">
+          <div style={{ flex: 1, height: '300px' }} dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={stats?.bar_chart || []} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -100,7 +100,7 @@ export default function Home() {
         {/* Pie Chart */}
         <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
           <h2 style={{ fontSize: '1.1rem', margin: '0 0 1.5rem 0', color: 'var(--text-main)' }}>{t('policyDistribution')}</h2>
-          <div style={{ flex: 1, minHeight: '300px' }} dir="ltr">
+          <div style={{ flex: 1, height: '300px' }} dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -133,7 +133,7 @@ export default function Home() {
         {/* Policy Status Pie Chart */}
         <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
           <h2 style={{ fontSize: '1.1rem', margin: '0 0 1.5rem 0', color: 'var(--text-main)' }}>{locale === 'ar' ? 'حالة الوثائق' : 'Policy Status'}</h2>
-          <div style={{ flex: 1, minHeight: '300px' }} dir="ltr">
+          <div style={{ flex: 1, height: '300px' }} dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -161,7 +161,7 @@ export default function Home() {
         {/* Claims Pie Chart */}
         <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
           <h2 style={{ fontSize: '1.1rem', margin: '0 0 1.5rem 0', color: 'var(--text-main)' }}>{locale === 'ar' ? 'حالة المطالبات' : 'Claims Status'}</h2>
-          <div style={{ flex: 1, minHeight: '300px' }} dir="ltr">
+          <div style={{ flex: 1, height: '300px' }} dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

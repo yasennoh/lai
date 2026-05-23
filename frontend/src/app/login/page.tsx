@@ -42,10 +42,7 @@ export default function Login() {
             {loading ? 'جاري الدخول...' : 'تسجيل الدخول'}
           </button>
         </form>
-        <div style={{ marginTop: '1.5rem', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>
-          <p>أدمن: admin / admin123</p>
-          <p>مدخل بيانات: entry / entry123</p>
-        </div>
+
       </div>
     </div>
   );
