@@ -1,0 +1,3 @@
+Policy types in DB: {'HEALTH', 'LIFE', 'PROPERTY', 'AUTO', 'TRAVEL'}
+Policy statuses in DB: {'ACTIVE', 'PENDING', 'EXPIRED'}
+Departments in DB: ['مبيعات', 'قسم الحسابات', 'قسم ادارة الجودة', 'قسم ادارة المشتريات']

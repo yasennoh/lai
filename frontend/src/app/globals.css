@@ -1,0 +1,194 @@
+:root {
+  --primary: #009688;
+  --secondary: #14B8A6;
+  --accent: #0F766E;
+  --background: #F3F4F6;
+  --surface: #FFFFFF;
+  --text-main: #1F2937;
+  --text-muted: #6B7280;
+  --border: #E5E7EB;
+  
+  --sidebar-bg: #FFFFFF;
+  --sidebar-text: #4B5563;
+  --sidebar-active-bg: #E6F4F1;
+  --sidebar-active-text: #009688;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+/* Explicit Light Mode Override */
+[data-theme='light'] {
+  --primary: #009688;
+  --secondary: #14B8A6;
+  --accent: #0F766E;
+  --background: #F3F4F6;
+  --surface: #FFFFFF;
+  --text-main: #1F2937;
+  --text-muted: #6B7280;
+  --border: #E5E7EB;
+  
+  --sidebar-bg: #FFFFFF;
+  --sidebar-text: #4B5563;
+  --sidebar-active-bg: #E6F4F1;
+  --sidebar-active-text: #009688;
+}
+
+/* Explicit Dark Mode Override */
+[data-theme='dark'] {
+  --primary: #14B8A6;
+  --secondary: #2DD4BF;
+  --accent: #0F766E;
+  --background: #111827;
+  --surface: #1F2937;
+  --text-main: #F9FAFB;
+  --text-muted: #9CA3AF;
+  --border: #374151;
+  
+  --sidebar-bg: #1F2937;
+  --sidebar-text: #D1D5DB;
+  --sidebar-active-bg: rgba(20, 184, 166, 0.15);
+  --sidebar-active-text: #2DD4BF;
+}
+
+/* System Preference Default (if no theme toggle choice is made yet) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --primary: #14B8A6;
+    --secondary: #2DD4BF;
+    --accent: #0F766E;
+    --background: #111827;
+    --surface: #1F2937;
+    --text-main: #F9FAFB;
+    --text-muted: #9CA3AF;
+    --border: #374151;
+    
+    --sidebar-bg: #1F2937;
+    --sidebar-text: #D1D5DB;
+    --sidebar-active-bg: rgba(20, 184, 166, 0.15);
+    --sidebar-active-text: #2DD4BF;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-main);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Card / Surface Classes (replacing glass-panel) */
+.glass-panel, .card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: box-shadow 0.2s ease;
+}
+
+.glass-panel:hover, .card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Typography */
+h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 1rem;
+}
+
+p {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primary);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent);
+}
+
+/* Layout */
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Utilities */
+.text-sm { font-size: 0.875rem; }
+.text-xs { font-size: 0.75rem; }
+.font-medium { font-weight: 500; }
+.font-bold { font-weight: 700; }
+.text-muted { color: var(--text-muted); }
+
+/* Print Styles */
+.print-only {
+  display: none !important;
+}
+
+@media print {
+  @page { margin: 1cm; size: A4 portrait; }
+  body * {
+    visibility: hidden;
+  }
+  .print-only, .print-only * {
+    visibility: visible;
+  }
+  .print-only {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

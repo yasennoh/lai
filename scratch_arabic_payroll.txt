@@ -1,0 +1,97 @@
+69: 'المبيعات': 'Sales',
+70: 'مبيعات': 'Sales',
+71: 'الموارد البشرية': 'HR & Personnel',
+72: 'الموارد البشريه': 'HR & Personnel',
+73: 'المالية': 'Finance',
+74: 'الماليه': 'Finance',
+75: 'التسويق': 'Marketing',
+76: 'تكنولوجيا المعلومات': 'IT',
+77: 'الإدارة': 'Administration',
+78: 'الادارة': 'Administration',
+79: 'الاداره': 'Administration',
+80: 'خدمة العملاء': 'Customer Service',
+81: 'خدمه العملاء': 'Customer Service',
+82: 'الدعم الفني': 'Technical Support',
+83: 'العمليات': 'Operations',
+84: 'القانونية': 'Legal',
+85: 'القانونيه': 'Legal',
+86: 'قسم الحسابات': 'Accounts Department',
+87: 'قسم ادارة الجودة': 'Quality Management Department',
+88: 'قسم إدارة الجودة': 'Quality Management Department',
+89: 'قسم ادارة المشتريات': 'Purchasing Department',
+90: 'قسم إدارة المشتريات': 'Purchasing Department',
+175: alert(isEditMode ? locale === 'ar' ? 'تم تعديل سجل الرواتب بنجاح' : 'Payroll record updated successfully' : locale === 'ar' ? 'تم إضافة سجل الرواتب بنجاح' : 'Payroll record added successfully');
+177: alert(locale === 'ar' ? 'حدث خطأ أثناء حفظ السجل، يرجى التأكد من البيانات المدخلة' : 'Error saving record, please check entered data');
+180: alert(locale === 'ar' ? 'فشل الاتصال بالخادم' : 'Failed to connect to server');
+185: if (!confirm(locale === 'ar' ? 'هل أنت متأكد من حذف هذا السجل المالي بشكل نهائي؟' : 'Are you sure you want to permanently delete this payroll record?')) return;
+190: alert(locale === 'ar' ? 'تم حذف سجل الرواتب بنجاح' : 'Payroll record deleted successfully');
+192: alert(locale === 'ar' ? 'فشل حذف السجل' : 'Failed to delete record');
+195: alert(locale === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Server connection error');
+200: if (!confirm(locale === 'ar' ? `هل تريد تأكيد صرف راتب الموظف ${record.employee_name} لشهر ${record.month}؟` : `Are you sure you want to confirm the payment of employee ${record.employee_name} for the month of ${record.month}?`)) return;
+212: alert(locale === 'ar' ? 'تم تأكيد صرف الراتب بنجاح وتسجيل تاريخ الصرف اللحظي' : 'Salary payment confirmed successfully and instantaneous payment date recorded');
+214: alert(locale === 'ar' ? 'فشل تحديث حالة الصرف' : 'Failed to update payment status');
+217: alert(locale === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Server connection error');
+260: const dName = dbName ? translateDepartment(dbName, locale) : (locale === 'ar' ? 'غير محدد' : 'Not Specified');
+285: [locale === 'ar' ? 'اسم الموظف' : 'Employee Name']: r.employee_name,
+286: [locale === 'ar' ? 'القسم' : 'Department']: r.employee_details?.department_name ? translateDepartment(r.employee_details.department_name, locale) : (locale === 'ar' ? 'غير محدد' : 'Not Specified'),
+287: [locale === 'ar' ? 'الشهر' : 'Month']: r.month,
+288: [locale === 'ar' ? 'الراتب الأساسي' : 'Basic Salary']: basic,
+289: [locale === 'ar' ? 'الحوافز والبونص' : 'Incentives & Bonus']: bonus,
+290: [locale === 'ar' ? 'العمل الإضافي' : 'Overtime']: ot,
+291: [locale === 'ar' ? 'التأمينات الاجتماعية (خصم)' : 'Social Security (Deduction)']: ss,
+292: [locale === 'ar' ? 'صافي الراتب' : 'Net Salary']: net,
+293: [locale === 'ar' ? 'مخصصات نهاية الخدمة' : 'End of Service Benefits']: parseFloat(r.end_of_service),
+294: [locale === 'ar' ? 'الحالة' : 'Status']: r.status === 'PAID' ? (locale === 'ar' ? 'تم الصرف' : 'Paid') : (locale === 'ar' ? 'قيد الانتظار' : 'Pending'),
+295: [locale === 'ar' ? 'تاريخ الصرف' : 'Payout Date']: r.payout_date || '—',
+296: [locale === 'ar' ? 'ملاحظات' : 'Notes']: r.notes || ''
+303: XLSX.utils.book_append_sheet(workbook, worksheet, locale === 'ar' ? 'مسير الرواتب والأجور' : 'Payroll Sheet');
+306: alert(locale === 'ar' ? 'خطأ في تصدير البيانات إلى Excel' : 'Error exporting data to Excel');
+313: <p style={{ fontSize: '1.5rem', color: 'var(--text-muted)' }}>{locale === 'ar' ? 'جاري تحميل مسير الرواتب والمستحقات الماليّة...' : 'Loading payroll and financial dues...'}</p>
+322: <h1 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 'bold', color: 'var(--text-main)' }}>{locale === 'ar' ? 'إدارة مسير الرواتب والمستحقات الماليّة (Payroll)' : 'Payroll & Financial Dues Management'}</h1>
+323: <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{locale === 'ar' ? 'لوحة التحكم / الموارد البشرية والرواتب' : 'Dashboard / HR & Payroll'}</span>
+330: <label style={{ fontSize: '0.95rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{locale === 'ar' ? 'الشهر:' : 'Month:'}</label>
+332: {months.map(m => <option key={m} value={m}>{m === 'ALL' ? (locale === 'ar' ? 'الكل' : 'All') : m}</option>)}
+336: <label style={{ fontSize: '0.95rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{locale === 'ar' ? 'القسم:' : 'Department:'}</label>
+338: <option value="ALL">{locale === 'ar' ? 'كل الأقسام' : 'All Departments'}</option>
+346: {locale === 'ar' ? 'إضافة سجل مالي' : 'Add Payroll Record'}
+365: {locale === 'ar' ? 'تصدير كشف الرواتب (Excel)' : 'Export Payroll (Excel)'}
+373: { l: locale === 'ar' ? 'إجمالي صافي الرواتب المصروفة' : 'Total Net Paid Salaries', v: formatAmount(totalNet), c: '#10B981', icon: LocalAtmOutlinedIcon },
+374: { l: locale === 'ar' ? 'إجمالي الحوافز والبونص' : 'Total Incentives & Bonuses', v: formatAmount(totalBonuses), c: '#3B82F6', icon: StarOutlineOutlinedIcon },
+375: { l: locale === 'ar' ? 'إجمالي العمل الإضافي' : 'Total Overtime Dues', v: formatAmount(totalOvertime), c: '#F59E0B', icon: TimerOutlinedIcon },
+376: { l: locale === 'ar' ? 'التأمينات الاجتماعية المستقطعة' : 'Deducted Social Security', v: formatAmount(totalSocialSec), c: '#EF4444', icon: SecurityOutlinedIcon },
+377: { l: locale === 'ar' ? 'مخصصات نهاية الخدمة (EOS)' : 'End of Service Provisions (EOS)', v: formatAmount(totalEOS), c: '#8B5CF6', icon: SavingsOutlinedIcon }
+408: <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 'bold' }}>{locale === 'ar' ? 'إجمالي الرواتب بحسب القسم' : 'Total Salaries by Department'}</h3>
+426: <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1.2rem', color: 'var(--text-main)' }}>{locale === 'ar' ? 'سجلات وكشوفات الرواتب والأجور' : 'Payroll & Wages Records'}</h2>
+428: <p style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>{locale === 'ar' ? 'لا توجد سجلات رواتب مدخلة لهذا الشهر.' : 'No payroll records entered for this month.'}</p>
+433: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'اسم الموظف' : 'Employee Name'}</th>
+434: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'الراتب الأساسي' : 'Basic Salary'}</th>
+435: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'الحوافز والبونص' : 'Incentives & Bonus'}</th>
+436: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'العمل الإضافي' : 'Overtime'}</th>
+437: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'التأمينات (خصم)' : 'Social Security (Ded.)'}</th>
+438: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'صافي الراتب' : 'Net Salary'}</th>
+439: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'مخصصات نهاية الخدمة' : 'End of Service Benefits'}</th>
+440: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'حالة الصرف' : 'Payment Status'}</th>
+441: <th style={{ padding: '1rem', textAlign: 'center' }}>{locale === 'ar' ? 'العمليات الإجرائية' : 'Procedural Operations'}</th>
+476: <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{locale === 'ar' ? 'شهر' : 'Month'} {r.month} {r.payout_date && `• ${locale === 'ar' ? 'صرف' : 'Paid'} ${r.payout_date}`}</span>
+498: {r.status === 'PAID' ? (locale === 'ar' ? 'تم الصرف' : 'Paid') : (locale === 'ar' ? 'قيد الانتظار' : 'Pending')}
+505: title={locale === 'ar' ? "تأكيد صرف الراتب" : "Confirm Salary Payment"}
+513: title={locale === 'ar' ? "تعديل السجل" : "Edit Record"}
+520: title={locale === 'ar' ? "حذف السجل" : "Delete Record"}
+539: <h2 style={{ margin: 0, fontWeight: 'bold', color: 'var(--text-main)' }}>{isEditMode ? (locale === 'ar' ? 'تعديل السجل المالي للموظف' : 'Edit Employee Payroll Record') : (locale === 'ar' ? 'إضافة سجل مالي جديد لموظف' : 'Add New Employee Payroll Record')}</h2>
+545: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'اختيار الموظف *' : 'Select Employee *'}</label>
+561: <option value="">{locale === 'ar' ? 'اختر الموظف من القائمة...' : 'Select employee from the list...'}</option>
+572: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'الراتب الأساسي *' : 'Basic Salary *'}</label>
+580: placeholder={locale === 'ar' ? "مثال: 2500" : "e.g., 2500"}
+585: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'الشهر المستهدف *' : 'Target Month *'}</label>
+599: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'الحوافز والبونص' : 'Incentives & Bonus'}</label>
+611: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'العمل الإضافي' : 'Overtime'}</label>
+626: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'التأمينات الاجتماعية (استقطاع)' : 'Social Security (Deduction)'}</label>
+638: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'مخصصات نهاية الخدمة (EOS)' : 'End of Service Provision (EOS)'}</label>
+645: placeholder={locale === 'ar' ? "اتركه فارغاً للحساب التلقائي (8.33%)" : "Leave blank for auto-calculation (8.33%)"}
+652: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'الحالة الإبتدائية' : 'Initial Status'}</label>
+659: <option value="PENDING">{locale === 'ar' ? 'قيد الانتظار (حساب مستحق)' : 'Pending (Accrued)'}</option>
+660: <option value="PAID">{locale === 'ar' ? 'تم الصرف فوراً' : 'Paid Immediately'}</option>
+665: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'ملاحظات وتفاصيل الدفع' : 'Payment Notes & Details'}</label>
+670: placeholder={locale === 'ar' ? 'أدخل أي ملاحظات بخصوص بدلات العمل الإضافي أو البونص...' : 'Enter notes regarding overtime or bonus...'}
+677: {isEditMode ? (locale === 'ar' ? 'حفظ التعديلات' : 'Save Changes') : (locale === 'ar' ? 'إدراج السجل المالي' : 'Insert Payroll Record')}
+684: {locale === 'ar' ? 'إلغاء' : 'Cancel'}

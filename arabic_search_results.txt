@@ -1,0 +1,317 @@
+=== File: frontend/src/app/reports/page.tsx
+59: AUTO: { ar: 'تأمين السيارات', en: 'Auto Insurance' },
+60: HEALTH: { ar: 'تأمين صحي', en: 'Health Insurance' },
+61: LIFE: { ar: 'تأمين على الحياة', en: 'Life Insurance' },
+62: PROPERTY: { ar: 'تأمين الممتلكات', en: 'Property Insurance' },
+63: TRAVEL: { ar: 'تأمين السفر', en: 'Travel Insurance' },
+64: MARINE: { ar: 'تأمين النقل والبحري', en: 'Marine & Transport Insurance' },
+65: FIRE: { ar: 'تأمين ضد الحريق', en: 'Fire Insurance' },
+66: LIABILITY: { ar: 'تأمين المسؤولية', en: 'Liability Insurance' },
+68: return types[type] ? (locale === 'ar' ? types[type].ar : types[type].en) : (locale === 'ar' ? 'أخرى' : 'Other');
+73: ACTIVE: { ar: 'فعالة', en: 'Active' },
+74: EXPIRED: { ar: 'منتهية', en: 'Expired' },
+75: CANCELLED: { ar: 'ملغاة', en: 'Cancelled' },
+76: PENDING: { ar: 'قيد الانتظار', en: 'Pending' },
+77: SUSPENDED: { ar: 'معلقة', en: 'Suspended' },
+79: return statuses[status] ? (locale === 'ar' ? statuses[status].ar : statuses[status].en) : (locale === 'ar' ? 'غير معروف' : 'Unknown');
+87: AUTO: { label: locale === 'ar' ? 'تأمين السيارات' : 'Auto Insurance', icon: '🚗' },
+88: HEALTH: { label: locale === 'ar' ? 'تأمين صحي' : 'Health Insurance', icon: '🏥' },
+89: LIFE: { label: locale === 'ar' ? 'تأمين على الحياة' : 'Life Insurance', icon: '🛡️' },
+90: PROPERTY: { label: locale === 'ar' ? 'تأمين الممتلكات' : 'Property Insurance', icon: '🏠' },
+91: TRAVEL: { label: locale === 'ar' ? 'تأمين السفر' : 'Travel Insurance', icon: '✈️' },
+92: MARINE: { label: locale === 'ar' ? 'تأمين النقل والبحري' : 'Marine & Transport Insurance', icon: '🚢' },
+93: FIRE: { label: locale === 'ar' ? 'تأمين ضد الحريق' : 'Fire Insurance', icon: '🔥' },
+94: LIABILITY: { label: locale === 'ar' ? 'تأمين المسؤولية' : 'Liability Insurance', icon: '⚖️' },
+186: if (!policy) return locale === 'ar' ? 'غير معروف' : 'Unknown';
+188: if (!client) return locale === 'ar' ? 'غير معروف' : 'Unknown';
+253: alert(locale === 'ar' ? `لا توجد وثائق من نوع ${typeLabel} في الفترة المحددة لتصديرها` : `No policies of type ${typeLabel} found in the specified period for export`);
+260: [locale === 'ar' ? 'رقم الوثيقة' : 'Policy Number']: p.policy_number,
+261: [locale === 'ar' ? 'العميل' : 'Client']: clientName,
+262: [locale === 'ar' ? 'نوع التأمين' : 'Insurance Type']: typeLabel,
+263: [locale === 'ar' ? 'مبلغ القسط' : 'Premium Amount']: currency === 'IQD' ? Math.round(parseFloat(p.premium_amount) * 1450) : parseFloat(p.premium_amount),
+264: [locale === 'ar' ? 'مبلغ التغطية' : 'Coverage Amount']: currency === 'IQD' ? Math.round(parseFloat(p.coverage_amount) * 1450) : parseFloat(p.coverage_amount),
+265: [locale === 'ar' ? 'العملة' : 'Currency']: currency === 'IQD' ? 'IQD' : 'USD',
+266: [locale === 'ar' ? 'تاريخ الإصدار' : 'Issue Date']: new Date(p.start_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US'),
+267: [locale === 'ar' ? 'تاريخ الانتهاء' : 'Expiry Date']: new Date(p.end_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US'),
+268: [locale === 'ar' ? 'حالة الوثيقة' : 'Policy Status']: translatePolicyStatus(p.status, locale),
+269: [locale === 'ar' ? 'تاريخ الإضافة' : 'Date Added']: new Date(p.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US'),
+270: [locale === 'ar' ? 'المستخدم المدخل' : 'Entered By']: p.created_by_name || ''
+276: XLSX.utils.book_append_sheet(wb, ws, locale === 'ar' ? `إيرادات ${typeLabel}` : `${typeLabel} Revenue`);
+287: alert(locale === 'ar' ? `لا توجد مطالبات/خسائر من نوع ${typeLabel} في الفترة المحددة لتصديرها` : `No claims/losses of type ${typeLabel} found in the specified period for export`);
+293: const policyNum = policy ? policy.policy_number : locale === 'ar' ? 'غير معروف' : 'Unknown';
+297: PENDING: locale === 'ar' ? 'قيد المراجعة' : 'Pending',
+298: UNDER_REVIEW: locale === 'ar' ? 'تحت الإجراء' : 'Under Review',
+299: APPROVED: locale === 'ar' ? 'مقبولة (خسارة معتمدة)' : 'Approved (Loss Confirmed)',
+300: REJECTED: locale === 'ar' ? 'مرفوضة' : 'Rejected',
+304: [locale === 'ar' ? 'رقم المطالبة' : 'Claim Number']: c.claim_number,
+305: [locale === 'ar' ? 'رقم الوثيقة' : 'Policy Number']: policyNum,
+306: [locale === 'ar' ? 'نوع التأمين' : 'Insurance Type']: typeLabel,
+307: [locale === 'ar' ? 'العميل' : 'Client']: clientName,
+308: [locale === 'ar' ? 'مبلغ المطالبة (الخسارة)' : 'Claim Amount (Loss)']: currency === 'IQD' ? Math.round(parseFloat(c.claim_amount) * 1450) : parseFloat(c.claim_amount),
+309: [locale === 'ar' ? 'العملة' : 'Currency']: currency === 'IQD' ? 'IQD' : 'USD',
+310: [locale === 'ar' ? 'حالة المطالبة' : 'Claim Status']: statusLabels[c.status] || c.status,
+311: [locale === 'ar' ? 'تاريخ التقديم' : 'Date Filed']: new Date(c.filed_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US'),
+312: [locale === 'ar' ? 'تفاصيل المطالبة' : 'Claim Details']: c.description || ''
+318: XLSX.utils.book_append_sheet(wb, ws, locale === 'ar' ? `خسائر ${typeLabel}` : `${typeLabel} Losses`);
+325: if (filtered.length === 0) { alert(locale === 'ar' ? 'لا يوجد بيانات لتصديرها' : 'No data to export'); return; }
+328: [locale === 'ar' ? 'رقم التعريفي' : 'ID Number']: c.id,
+329: [locale === 'ar' ? 'الاسم الأول' : 'First Name']: c.first_name,
+330: [locale === 'ar' ? 'الاسم الثاني' : 'Second Name']: c.second_name,
+331: [locale === 'ar' ? 'الاسم الثالث' : 'Third Name']: c.third_name || '',
+332: [locale === 'ar' ? 'اللقب' : 'Last Name']: c.last_name || '',
+333: [locale === 'ar' ? 'التصنيف' : 'Classification']: c.client_type === 'CORPORATE' ? (locale === 'ar' ? 'شركات' : 'Corporate') : (locale === 'ar' ? 'فردي' : 'Individual'),
+334: [locale === 'ar' ? 'الحالة' : 'Status']: c.status === 'ACTIVE' ? (locale === 'ar' ? 'نشط' : 'Active') : (locale === 'ar' ? 'غير نشط' : 'Inactive'),
+335: [locale === 'ar' ? 'رقم الهوية' : 'National ID']: c.national_id || '',
+336: [locale === 'ar' ? 'البريد الإلكتروني' : 'Email']: c.email || '',
+337: [locale === 'ar' ? 'الهاتف' : 'Phone']: c.phone || '',
+338: [locale === 'ar' ? 'الهاتف 2' : 'Phone 2']: c.phone2 || '',
+339: [locale === 'ar' ? 'العنوان' : 'Address']: c.address || '',
+340: [locale === 'ar' ? 'تاريخ الإضافة' : 'Date Added']: new Date(c.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US'),
+341: [locale === 'ar' ? 'المدخل' : 'Entered By']: c.created_by_name || ''
+346: XLSX.utils.book_append_sheet(wb, ws, locale === 'ar' ? "تقرير العملاء" : "Clients Report");
+352: if (filtered.length === 0) { alert(locale === 'ar' ? 'لا يوجد بيانات لتصديرها' : 'No data to export'); return; }
+355: [locale === 'ar' ? 'رقم التعريفي' : 'ID Number']: c.id,
+356: [locale === 'ar' ? 'الاسم الأول' : 'First Name']: c.first_name,
+357: [locale === 'ar' ? 'الاسم الثاني' : 'Second Name']: c.second_name,
+358: [locale === 'ar' ? 'الاسم الثالث' : 'Third Name']: c.third_name || '',
+359: [locale === 'ar' ? 'اللقب' : 'Last Name']: c.last_name || '',
+360: [locale === 'ar' ? 'التصنيف' : 'Classification']: c.client_type === 'CORPORATE' ? (locale === 'ar' ? 'شركات' : 'Corporate') : (locale === 'ar' ? 'فردي' : 'Individual'),
+361: [locale === 'ar' ? 'الحالة' : 'Status']: locale === 'ar' ? 'محتمل' : 'Lead',
+362: [locale === 'ar' ? 'رقم الهوية' : 'National ID']: c.national_id || '',
+363: [locale === 'ar' ? 'البريد الإلكتروني' : 'Email']: c.email || '',
+364: [locale === 'ar' ? 'الهاتف' : 'Phone']: c.phone || '',
+365: [locale === 'ar' ? 'الهاتف 2' : 'Phone 2']: c.phone2 || '',
+366: [locale === 'ar' ? 'العنوان' : 'Address']: c.address || '',
+367: [locale === 'ar' ? 'تاريخ الإضافة' : 'Date Added']: new Date(c.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US'),
+368: [locale === 'ar' ? 'المدخل' : 'Entered By']: c.created_by_name || ''
+373: XLSX.utils.book_append_sheet(wb, ws, locale === 'ar' ? "تقرير العملاء المحتملين" : "Leads Report");
+394: if (filtered.length === 0) { alert(locale === 'ar' ? 'لا يوجد بيانات لتصديرها' : 'No data to export'); return; }
+400: [locale === 'ar' ? 'رقم الوثيقة' : 'Policy Number']: p.policy_number,
+401: [locale === 'ar' ? 'العميل' : 'Client']: clientName,
+402: [locale === 'ar' ? 'النوع' : 'Type']: translatePolicyType(p.policy_type, locale),
+403: [locale === 'ar' ? 'الحالة' : 'Status']: translatePolicyStatus(p.status, locale),
+404: [locale === 'ar' ? 'مبلغ القسط' : 'Premium Amount']: currency === 'IQD' ? Math.round(parseFloat(p.premium_amount) * 1450) : parseFloat(p.premium_amount),
+405: [locale === 'ar' ? 'مبلغ التغطية' : 'Coverage Amount']: currency === 'IQD' ? Math.round(parseFloat(p.coverage_amount) * 1450) : parseFloat(p.coverage_amount),
+406: [locale === 'ar' ? 'العملة' : 'Currency']: currency === 'IQD' ? (locale === 'ar' ? 'دينار عراقي (IQD)' : 'Iraqi Dinar (IQD)') : (locale === 'ar' ? 'دولار أمريكي (USD)' : 'US Dollar (USD)'),
+407: [locale === 'ar' ? 'تاريخ الإصدار' : 'Issue Date']: new Date(p.start_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US'),
+408: [locale === 'ar' ? 'تاريخ الانتهاء' : 'Expiry Date']: new Date(p.end_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US'),
+409: [locale === 'ar' ? 'تاريخ الإضافة' : 'Date Added']: new Date(p.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US'),
+410: [locale === 'ar' ? 'المدخل' : 'Entered By']: p.created_by_name || ''
+416: XLSX.utils.book_append_sheet(wb, ws, locale === 'ar' ? "تقرير الوثائق" : "Policies Report");
+428: if (filtered.length === 0) { alert(locale === 'ar' ? 'لا يوجد بيانات لتصديرها' : 'No data to export'); return; }
+432: const policyNum = policy ? policy.policy_number : (locale === 'ar' ? 'غير معروف' : 'Unknown');
+435: [locale === 'ar' ? 'رقم المطالبة' : 'Claim Number']: c.claim_number,
+436: [locale === 'ar' ? 'العميل' : 'Client']: clientName,
+437: [locale === 'ar' ? 'رقم الوثيقة' : 'Policy Number']: policyNum,
+438: [locale === 'ar' ? 'مبلغ المطالبة' : 'Claim Amount']: currency === 'IQD' ? Math.round(parseFloat(c.claim_amount) * 1450) : parseFloat(c.claim_amount),
+439: [locale === 'ar' ? 'الحالة' : 'Status']: c.status === 'PENDING' || c.status === 'Submitted' ? (locale === 'ar' ? 'قيد المراجعة' : 'Pending') :
+440: c.status === 'UNDER_REVIEW' ? (locale === 'ar' ? 'تحت الإجراء' : 'Under Review') :
+441: c.status === 'APPROVED' ? (locale === 'ar' ? 'مقبولة' : 'Approved') :
+442: c.status === 'REJECTED' ? (locale === 'ar' ? 'مرفوضة' : 'Rejected') :
+443: c.status === 'CLOSED' ? (locale === 'ar' ? 'مغلقة' : 'Closed') : c.status,
+444: [locale === 'ar' ? 'تاريخ التقديم' : 'Date Filed']: new Date(c.filed_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US'),
+445: [locale === 'ar' ? 'الوصف' : 'Description']: c.description || ''
+451: XLSX.utils.book_append_sheet(wb, ws, locale === 'ar' ? "تقرير المطالبات" : "Claims Report");
+463: if (ratio === 0) return locale === 'ar' ? 'لا يوجد خسائر' : 'No Losses';
+464: if (ratio < 40) return locale === 'ar' ? 'آمن ومربح ممتاز' : 'Safe & Highly Profitable';
+465: if (ratio < 75) return locale === 'ar' ? 'مخاطر معتدلة مقبولة' : 'Moderate Acceptable Risk';
+466: return locale === 'ar' ? 'خسائر مرتفعة (حرجة)' : 'High Losses (Critical)';
+469: if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}><p style={{ fontSize: '1.5rem', color: 'var(--text-main)' }}>{locale === 'ar' ? 'جاري التحميل...' : 'Loading...'}</p></div>;
+477: <h1 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>{locale === 'ar' ? 'التقارير وتحليل الأداء المالي' : 'Reports & Financial Performance Analysis'}</h1>
+478: <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{locale === 'ar' ? 'لوحة التحكم / التقارير والمالية' : 'Dashboard / Reports & Financials'}</span>
+497: {locale === 'ar' ? '📊 المؤشرات المالية والتحليلات' : '📊 Financial Indicators & Analytics'}
+513: {locale === 'ar' ? '📥 استخراج التقارير العامة (Excel)' : '📥 General Reports Export (Excel)'}
+523: <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--text-main)' }}>{locale === 'ar' ? '🔍 تصفية التقارير المالية والتحليلات' : '🔍 Filter Financial Reports & Analytics'}</h3>
+526: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.4rem' }}>{locale === 'ar' ? 'فترة التحليل المالي' : 'Financial Analysis Period'}</label>
+528: <option value="ALL">{locale === 'ar' ? 'جميع الأوقات (تاريخ تراكمي)' : 'All Time (Cumulative)'}</option>
+529: <option value="1_MONTH">{locale === 'ar' ? 'آخر 30 يوم' : 'Last 30 Days'}</option>
+530: <option value="6_MONTHS">{locale === 'ar' ? 'آخر 6 أشهر' : 'Last 6 Months'}</option>
+531: <option value="1_YEAR">{locale === 'ar' ? 'آخر سنة' : 'Last Year'}</option>
+532: <option value="CUSTOM">{locale === 'ar' ? 'تحديد فترة مخصصة (تواريخ)' : 'Custom Date Range'}</option>
+538: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.4rem' }}>{locale === 'ar' ? 'من تاريخ' : 'From Date'}</label>
+542: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.4rem' }}>{locale === 'ar' ? 'إلى تاريخ' : 'To Date'}</label>
+555: <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '500' }}>{locale === 'ar' ? '💰 إيرادات أقساط التأمين المكتتبة' : '💰 Written Premium Revenue'}</span>
+557: <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{locale === 'ar' ? `${filteredPoliciesList.length} وثيقة صادرة خلال الفترة` : `${filteredPoliciesList.length} policies issued in the period`}</span>
+562: <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '500' }}>{locale === 'ar' ? '🚨 التعويضات والخسائر المعتمدة' : '🚨 Approved Claims & Losses'}</span>
+565: {locale === 'ar' ? `${filteredClaimsList.filter(c => c.status === 'APPROVED').length} مطالبة مقبولة ومدفوعة` : `${filteredClaimsList.filter(c => c.status === 'APPROVED').length} claims approved & paid`}
+571: <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '500' }}>{locale === 'ar' ? '📈 صافي الإيراد التشغيلي (الفائض)' : '📈 Net Operating Income (Surplus)'}</span>
+575: <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{locale === 'ar' ? 'بعد خصم الخسائر المسددة من الإيرادات' : 'After deducting paid losses from revenues'}</span>
+580: <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '500' }}>{locale === 'ar' ? '📊 معدل الخسارة الإجمالي (Loss Ratio)' : '📊 Overall Loss Ratio'}</span>
+595: <h2 style={{ margin: 0, color: 'var(--primary)' }}>{locale === 'ar' ? '💰 تقرير إيرادات وثائق التأمين (حسب النوع)' : '💰 Insurance Policies Revenue Report (by Type)'}</h2>
+596: <p style={{ margin: '0.3rem 0 0 0', color: 'var(--text-muted)' }}>{locale === 'ar' ? 'مجموع مبالغ الأقساط ونسب المساهمة المالية لكل نوع تأمين' : 'Total premium amounts and financial contribution rates for each insurance type'}</p>
+601: [locale === 'ar' ? 'نوع التأمين' : 'Insurance Type']: s.label,
+602: [locale === 'ar' ? 'عدد الوثائق الصادرة' : 'Issued Policies Count']: s.count,
+603: [locale === 'ar' ? 'إجمالي الإيرادات (الأقساط)' : 'Total Revenues (Premiums)']: currency === 'IQD' ? Math.round(s.revenue * 1450) : s.revenue,
+604: [locale === 'ar' ? 'نسبة المساهمة من المبيعات' : 'Sales Contribution Share']: `${s.share.toFixed(1)}%`,
+605: [locale === 'ar' ? 'العملة' : 'Currency']: currency === 'IQD' ? 'IQD' : 'USD'
+609: XLSX.utils.book_append_sheet(wb, ws, locale === 'ar' ? "تقرير إيرادات وثائق التأمين" : "Policies Revenue Summary");
+614: {locale === 'ar' ? '📥 تصدير ملخص الإيرادات (Excel)' : '📥 Export Revenue Summary (Excel)'}
+622: <th style={tableHeaderStyle}>{locale === 'ar' ? 'نوع التأمين' : 'Insurance Type'}</th>
+623: <th style={tableHeaderStyle}>{locale === 'ar' ? 'عدد الوثائق النشطة' : 'Number of Active Policies'}</th>
+624: <th style={tableHeaderStyle}>{locale === 'ar' ? 'إجمالي إيرادات الأقساط' : 'Total Premium Revenues'}</th>
+625: <th style={tableHeaderStyle}>{locale === 'ar' ? 'نسبة المساهمة المالية' : 'Financial Contribution Percentage'}</th>
+626: <th style={{ ...tableHeaderStyle, textAlign: 'center' }}>{locale === 'ar' ? 'التحميل والاستخراج' : 'Download and Extraction'}</th>
+638: <td style={tableCellStyle}>{locale === 'ar' ? `${stat.count} وثيقة` : `${stat.count} Policies`}</td>
+660: {locale === 'ar' ? '📥 تصدير كشف إيرادات Excel' : '📥 Export Revenue Excel'}
+674: <h2 style={{ margin: 0, color: '#EF4444' }}>{locale === 'ar' ? '🚨 تقرير الخسائر ومطالبات التعويض (حسب النوع)' : '🚨 Claims & Losses Report (by Type)'}</h2>
+675: <p style={{ margin: '0.3rem 0 0 0', color: 'var(--text-muted)' }}>{locale === 'ar' ? 'تحليل المطالبات المعتمدة (الخسائر المدفوعة) ونسب الخسارة مقابل الأقساط' : 'Analysis of approved claims (paid losses) and loss ratios vs premiums'}</p>
+680: [locale === 'ar' ? 'نوع التأمين' : 'Insurance Type']: s.label,
+681: [locale === 'ar' ? 'المطالبات المقدمة' : 'Submitted Claims']: s.claimsCount,
+682: [locale === 'ar' ? 'الخسائر المعتمدة (المدفوعة)' : 'Approved Losses (Paid)']: currency === 'IQD' ? Math.round(s.approvedClaimsAmount * 1450) : s.approvedClaimsAmount,
+683: [locale === 'ar' ? 'معدل الخسارة (Loss Ratio)' : 'Loss Ratio']: `${s.lossRatio.toFixed(1)}%`,
+684: [locale === 'ar' ? 'مستوى تقييم الخسارة' : 'Loss Assessment Level']: getLossRatioLabel(s.lossRatio),
+685: [locale === 'ar' ? 'العملة' : 'Currency']: currency === 'IQD' ? 'IQD' : 'USD'
+689: XLSX.utils.book_append_sheet(wb, ws, locale === 'ar' ? "تقرير خسائر ومطالبات التأمين" : "Insurance Claims & Losses Report");
+695: {locale === 'ar' ? '📥 تصدير ملخص الخسائر (Excel)' : '📥 Export Loss Summary (Excel)'}
+703: <th style={tableHeaderStyle}>{locale === 'ar' ? 'نوع التأمين' : 'Insurance Type'}</th>
+704: <th style={tableHeaderStyle}>{locale === 'ar' ? 'المطالبات المقدمة' : 'Submitted Claims'}</th>
+705: <th style={tableHeaderStyle}>{locale === 'ar' ? 'الخسائر المعتمدة المعتمدة' : 'Approved Losses'}</th>
+706: <th style={tableHeaderStyle}>{locale === 'ar' ? 'معدل خسارة التأمين (Loss Ratio)' : 'Loss Ratio'}</th>
+707: <th style={tableHeaderStyle}>{locale === 'ar' ? 'درجة الخطورة' : 'Risk Level'}</th>
+708: <th style={{ ...tableHeaderStyle, textAlign: 'center' }}>{locale === 'ar' ? 'التحميل والاستخراج' : 'Download and Extraction'}</th>
+720: <td style={tableCellStyle}>{locale === 'ar' ? `${stat.claimsCount} مطالبات` : `${stat.claimsCount} Claims`}</td>
+752: {locale === 'ar' ? '📥 تصدير تفاصيل الخسائر Excel' : '📥 Export Loss Details Excel'}
+772: <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: '#3B82F6' }}>{locale === 'ar' ? '👤 تقرير العملاء (النشطين)' : '👤 Active Clients Report'}</h2>
+775: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'الفترة الزمنية (تاريخ الإضافة)' : 'Time Period (Date Added)'}</label>
+777: <option value="ALL">{locale === 'ar' ? 'الكل' : 'All'}</option>
+778: <option value="1_MONTH">{locale === 'ar' ? 'آخر شهر' : 'Last Month'}</option>
+779: <option value="6_MONTHS">{locale === 'ar' ? 'آخر 6 أشهر' : 'Last 6 Months'}</option>
+780: <option value="1_YEAR">{locale === 'ar' ? 'آخر سنة' : 'Last Year'}</option>
+781: <option value="CUSTOM">{locale === 'ar' ? 'مخصص (اختيار تواريخ)' : 'Custom (Select Dates)'}</option>
+787: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'من تاريخ' : 'From Date'}</label>
+791: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'إلى تاريخ' : 'To Date'}</label>
+799: {locale === 'ar' ? 'استخراج تقرير العملاء (Excel)' : 'Export Clients Report (Excel)'}
+806: <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: '#F59E0B' }}>{locale === 'ar' ? '🎯 تقرير العملاء المحتملين' : '🎯 Leads Report'}</h2>
+809: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'الفترة الزمنية (تاريخ الإضافة)' : 'Time Period (Date Added)'}</label>
+811: <option value="ALL">{locale === 'ar' ? 'الكل' : 'All'}</option>
+812: <option value="1_MONTH">{locale === 'ar' ? 'آخر شهر' : 'Last Month'}</option>
+813: <option value="6_MONTHS">{locale === 'ar' ? 'آخر 6 أشهر' : 'Last 6 Months'}</option>
+814: <option value="1_YEAR">{locale === 'ar' ? 'آخر سنة' : 'Last Year'}</option>
+815: <option value="CUSTOM">{locale === 'ar' ? 'مخصص (اختيار تواريخ)' : 'Custom (Select Dates)'}</option>
+821: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'من تاريخ' : 'From Date'}</label>
+825: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'إلى تاريخ' : 'To Date'}</label>
+833: {locale === 'ar' ? 'استخراج العملاء المحتملين (Excel)' : 'Export Leads (Excel)'}
+840: <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: '#10B981' }}>{locale === 'ar' ? '📄 تقرير كافة الوثائق' : '📄 All Policies Report'}</h2>
+843: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'الفترة الزمنية (تاريخ الإضافة)' : 'Time Period (Date Added)'}</label>
+845: <option value="ALL">{locale === 'ar' ? 'الكل' : 'All'}</option>
+846: <option value="1_MONTH">{locale === 'ar' ? 'آخر شهر' : 'Last Month'}</option>
+847: <option value="6_MONTHS">{locale === 'ar' ? 'آخر 6 أشهر' : 'Last 6 Months'}</option>
+848: <option value="1_YEAR">{locale === 'ar' ? 'آخر سنة' : 'Last Year'}</option>
+849: <option value="CUSTOM">{locale === 'ar' ? 'مخصص (اختيار تواريخ)' : 'Custom (Select Dates)'}</option>
+855: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'من تاريخ' : 'From Date'}</label>
+859: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'إلى تاريخ' : 'To Date'}</label>
+865: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'حالة الوثيقة' : 'Policy Status'}</label>
+867: <option value="ALL">{locale === 'ar' ? 'جميع الحالات' : 'All Statuses'}</option>
+868: <option value="ACTIVE">{locale === 'ar' ? 'فعالة' : 'Active'}</option>
+869: <option value="EXPIRED">{locale === 'ar' ? 'منتهية' : 'Expired'}</option>
+870: <option value="NEAREXPIRY">{locale === 'ar' ? 'شارفت على الانتهاء (خلال 30 يوم)' : 'Expiring Soon (Within 30 Days)'}</option>
+876: {locale === 'ar' ? 'استخراج تقرير الوثائق (Excel)' : 'Export Policies Report (Excel)'}
+883: <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: '#8B5CF6' }}>{locale === 'ar' ? '🏥 تقرير كافة المطالبات' : '🏥 All Claims Report'}</h2>
+886: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'الفترة الزمنية (تاريخ التقديم)' : 'Time Period (Date Filed)'}</label>
+888: <option value="ALL">{locale === 'ar' ? 'الكل' : 'All'}</option>
+889: <option value="1_MONTH">{locale === 'ar' ? 'آخر شهر' : 'Last Month'}</option>
+890: <option value="6_MONTHS">{locale === 'ar' ? 'آخر 6 أشهر' : 'Last 6 Months'}</option>
+891: <option value="1_YEAR">{locale === 'ar' ? 'آخر سنة' : 'Last Year'}</option>
+892: <option value="CUSTOM">{locale === 'ar' ? 'مخصص (اختيار تواريخ)' : 'Custom (Select Dates)'}</option>
+898: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'من تاريخ' : 'From Date'}</label>
+902: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'إلى تاريخ' : 'To Date'}</label>
+908: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'حالة المطالبة' : 'Claim Status'}</label>
+910: <option value="ALL">{locale === 'ar' ? 'جميع الحالات' : 'All Statuses'}</option>
+911: <option value="PENDING">{locale === 'ar' ? 'قيد المراجعة' : 'Pending'}</option>
+912: <option value="UNDER_REVIEW">{locale === 'ar' ? 'تحت الإجراء' : 'Under Review'}</option>
+913: <option value="APPROVED">{locale === 'ar' ? 'مقبولة' : 'Approved'}</option>
+914: <option value="REJECTED">{locale === 'ar' ? 'مرفوضة' : 'Rejected'}</option>
+915: <option value="CLOSED">{locale === 'ar' ? 'مغلقة' : 'Closed'}</option>
+921: {locale === 'ar' ? 'استخراج تقرير المطالبات (Excel)' : 'Export Claims Report (Excel)'}
+=== File: frontend/src/app/payroll/page.tsx
+69: 'المبيعات': 'Sales',
+70: 'الموارد البشرية': 'HR & Personnel',
+71: 'الموارد البشريه': 'HR & Personnel',
+72: 'المالية': 'Finance',
+73: 'الماليه': 'Finance',
+74: 'التسويق': 'Marketing',
+75: 'تكنولوجيا المعلومات': 'IT',
+76: 'الإدارة': 'Administration',
+77: 'الادارة': 'Administration',
+78: 'الاداره': 'Administration',
+79: 'خدمة العملاء': 'Customer Service',
+80: 'خدمه العملاء': 'Customer Service',
+81: 'الدعم الفني': 'Technical Support',
+82: 'العمليات': 'Operations',
+83: 'القانونية': 'Legal',
+84: 'القانونيه': 'Legal',
+169: alert(isEditMode ? locale === 'ar' ? 'تم تعديل سجل الرواتب بنجاح' : 'Payroll record updated successfully' : locale === 'ar' ? 'تم إضافة سجل الرواتب بنجاح' : 'Payroll record added successfully');
+171: alert(locale === 'ar' ? 'حدث خطأ أثناء حفظ السجل، يرجى التأكد من البيانات المدخلة' : 'Error saving record, please check entered data');
+174: alert(locale === 'ar' ? 'فشل الاتصال بالخادم' : 'Failed to connect to server');
+179: if (!confirm(locale === 'ar' ? 'هل أنت متأكد من حذف هذا السجل المالي بشكل نهائي؟' : 'Are you sure you want to permanently delete this payroll record?')) return;
+184: alert(locale === 'ar' ? 'تم حذف سجل الرواتب بنجاح' : 'Payroll record deleted successfully');
+186: alert(locale === 'ar' ? 'فشل حذف السجل' : 'Failed to delete record');
+189: alert(locale === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Server connection error');
+194: if (!confirm(locale === 'ar' ? `هل تريد تأكيد صرف راتب الموظف ${record.employee_name} لشهر ${record.month}؟` : `Are you sure you want to confirm the payment of employee ${record.employee_name} for the month of ${record.month}?`)) return;
+206: alert(locale === 'ar' ? 'تم تأكيد صرف الراتب بنجاح وتسجيل تاريخ الصرف اللحظي' : 'Salary payment confirmed successfully and instantaneous payment date recorded');
+208: alert(locale === 'ar' ? 'فشل تحديث حالة الصرف' : 'Failed to update payment status');
+211: alert(locale === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Server connection error');
+254: const dName = dbName ? translateDepartment(dbName, locale) : (locale === 'ar' ? 'غير محدد' : 'Not Specified');
+279: [locale === 'ar' ? 'اسم الموظف' : 'Employee Name']: r.employee_name,
+280: [locale === 'ar' ? 'القسم' : 'Department']: r.employee_details?.department_name ? translateDepartment(r.employee_details.department_name, locale) : (locale === 'ar' ? 'غير محدد' : 'Not Specified'),
+281: [locale === 'ar' ? 'الشهر' : 'Month']: r.month,
+282: [locale === 'ar' ? 'الراتب الأساسي' : 'Basic Salary']: basic,
+283: [locale === 'ar' ? 'الحوافز والبونص' : 'Incentives & Bonus']: bonus,
+284: [locale === 'ar' ? 'العمل الإضافي' : 'Overtime']: ot,
+285: [locale === 'ar' ? 'التأمينات الاجتماعية (خصم)' : 'Social Security (Deduction)']: ss,
+286: [locale === 'ar' ? 'صافي الراتب' : 'Net Salary']: net,
+287: [locale === 'ar' ? 'مخصصات نهاية الخدمة' : 'End of Service Benefits']: parseFloat(r.end_of_service),
+288: [locale === 'ar' ? 'الحالة' : 'Status']: r.status === 'PAID' ? (locale === 'ar' ? 'تم الصرف' : 'Paid') : (locale === 'ar' ? 'قيد الانتظار' : 'Pending'),
+289: [locale === 'ar' ? 'تاريخ الصرف' : 'Payout Date']: r.payout_date || '—',
+290: [locale === 'ar' ? 'ملاحظات' : 'Notes']: r.notes || ''
+297: XLSX.utils.book_append_sheet(workbook, worksheet, locale === 'ar' ? 'مسير الرواتب والأجور' : 'Payroll Sheet');
+300: alert(locale === 'ar' ? 'خطأ في تصدير البيانات إلى Excel' : 'Error exporting data to Excel');
+307: <p style={{ fontSize: '1.5rem', color: 'var(--text-muted)' }}>{locale === 'ar' ? 'جاري تحميل مسير الرواتب والمستحقات الماليّة...' : 'Loading payroll and financial dues...'}</p>
+316: <h1 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 'bold', color: 'var(--text-main)' }}>{locale === 'ar' ? 'إدارة مسير الرواتب والمستحقات الماليّة (Payroll)' : 'Payroll & Financial Dues Management'}</h1>
+317: <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{locale === 'ar' ? 'لوحة التحكم / الموارد البشرية والرواتب' : 'Dashboard / HR & Payroll'}</span>
+324: <label style={{ fontSize: '0.95rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{locale === 'ar' ? 'الشهر:' : 'Month:'}</label>
+326: {months.map(m => <option key={m} value={m}>{m === 'ALL' ? (locale === 'ar' ? 'الكل' : 'All') : m}</option>)}
+330: <label style={{ fontSize: '0.95rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{locale === 'ar' ? 'القسم:' : 'Department:'}</label>
+332: <option value="ALL">{locale === 'ar' ? 'كل الأقسام' : 'All Departments'}</option>
+340: {locale === 'ar' ? 'إضافة سجل مالي' : 'Add Payroll Record'}
+359: {locale === 'ar' ? 'تصدير كشف الرواتب (Excel)' : 'Export Payroll (Excel)'}
+367: { l: locale === 'ar' ? 'إجمالي صافي الرواتب المصروفة' : 'Total Net Paid Salaries', v: formatAmount(totalNet), c: '#10B981', icon: LocalAtmOutlinedIcon },
+368: { l: locale === 'ar' ? 'إجمالي الحوافز والبونص' : 'Total Incentives & Bonuses', v: formatAmount(totalBonuses), c: '#3B82F6', icon: StarOutlineOutlinedIcon },
+369: { l: locale === 'ar' ? 'إجمالي العمل الإضافي' : 'Total Overtime Dues', v: formatAmount(totalOvertime), c: '#F59E0B', icon: TimerOutlinedIcon },
+370: { l: locale === 'ar' ? 'التأمينات الاجتماعية المستقطعة' : 'Deducted Social Security', v: formatAmount(totalSocialSec), c: '#EF4444', icon: SecurityOutlinedIcon },
+371: { l: locale === 'ar' ? 'مخصصات نهاية الخدمة (EOS)' : 'End of Service Provisions (EOS)', v: formatAmount(totalEOS), c: '#8B5CF6', icon: SavingsOutlinedIcon }
+402: <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 'bold' }}>{locale === 'ar' ? 'إجمالي الرواتب بحسب القسم' : 'Total Salaries by Department'}</h3>
+420: <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1.2rem', color: 'var(--text-main)' }}>{locale === 'ar' ? 'سجلات وكشوفات الرواتب والأجور' : 'Payroll & Wages Records'}</h2>
+422: <p style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>{locale === 'ar' ? 'لا توجد سجلات رواتب مدخلة لهذا الشهر.' : 'No payroll records entered for this month.'}</p>
+427: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'اسم الموظف' : 'Employee Name'}</th>
+428: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'الراتب الأساسي' : 'Basic Salary'}</th>
+429: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'الحوافز والبونص' : 'Incentives & Bonus'}</th>
+430: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'العمل الإضافي' : 'Overtime'}</th>
+431: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'التأمينات (خصم)' : 'Social Security (Ded.)'}</th>
+432: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'صافي الراتب' : 'Net Salary'}</th>
+433: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'مخصصات نهاية الخدمة' : 'End of Service Benefits'}</th>
+434: <th style={{ padding: '1rem' }}>{locale === 'ar' ? 'حالة الصرف' : 'Payment Status'}</th>
+435: <th style={{ padding: '1rem', textAlign: 'center' }}>{locale === 'ar' ? 'العمليات الإجرائية' : 'Procedural Operations'}</th>
+470: <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{locale === 'ar' ? 'شهر' : 'Month'} {r.month} {r.payout_date && `• ${locale === 'ar' ? 'صرف' : 'Paid'} ${r.payout_date}`}</span>
+492: {r.status === 'PAID' ? (locale === 'ar' ? 'تم الصرف' : 'Paid') : (locale === 'ar' ? 'قيد الانتظار' : 'Pending')}
+499: title={locale === 'ar' ? "تأكيد صرف الراتب" : "Confirm Salary Payment"}
+507: title={locale === 'ar' ? "تعديل السجل" : "Edit Record"}
+514: title={locale === 'ar' ? "حذف السجل" : "Delete Record"}
+533: <h2 style={{ margin: 0, fontWeight: 'bold', color: 'var(--text-main)' }}>{isEditMode ? (locale === 'ar' ? 'تعديل السجل المالي للموظف' : 'Edit Employee Payroll Record') : (locale === 'ar' ? 'إضافة سجل مالي جديد لموظف' : 'Add New Employee Payroll Record')}</h2>
+539: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'اختيار الموظف *' : 'Select Employee *'}</label>
+555: <option value="">{locale === 'ar' ? 'اختر الموظف من القائمة...' : 'Select employee from the list...'}</option>
+566: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'الراتب الأساسي *' : 'Basic Salary *'}</label>
+574: placeholder={locale === 'ar' ? "مثال: 2500" : "e.g., 2500"}
+579: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'الشهر المستهدف *' : 'Target Month *'}</label>
+593: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'الحوافز والبونص' : 'Incentives & Bonus'}</label>
+605: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'العمل الإضافي' : 'Overtime'}</label>
+620: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'التأمينات الاجتماعية (استقطاع)' : 'Social Security (Deduction)'}</label>
+632: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'مخصصات نهاية الخدمة (EOS)' : 'End of Service Provision (EOS)'}</label>
+639: placeholder={locale === 'ar' ? "اتركه فارغاً للحساب التلقائي (8.33%)" : "Leave blank for auto-calculation (8.33%)"}
+646: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'الحالة الإبتدائية' : 'Initial Status'}</label>
+653: <option value="PENDING">{locale === 'ar' ? 'قيد الانتظار (حساب مستحق)' : 'Pending (Accrued)'}</option>
+654: <option value="PAID">{locale === 'ar' ? 'تم الصرف فوراً' : 'Paid Immediately'}</option>
+659: <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>{locale === 'ar' ? 'ملاحظات وتفاصيل الدفع' : 'Payment Notes & Details'}</label>
+664: placeholder={locale === 'ar' ? 'أدخل أي ملاحظات بخصوص بدلات العمل الإضافي أو البونص...' : 'Enter notes regarding overtime or bonus...'}
+671: {isEditMode ? (locale === 'ar' ? 'حفظ التعديلات' : 'Save Changes') : (locale === 'ar' ? 'إدراج السجل المالي' : 'Insert Payroll Record')}
+678: {locale === 'ar' ? 'إلغاء' : 'Cancel'}
