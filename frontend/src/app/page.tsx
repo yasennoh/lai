@@ -15,8 +15,9 @@ export default function Home() {
   const { formatAmount } = useCurrency();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
+  const [mounted, setMounted] = useState(false); 
   useEffect(() => {
+    setMounted(true); // <-- أضف هذا السطر
     fetch(API)
       .then(res => res.json())
       .then(data => {
