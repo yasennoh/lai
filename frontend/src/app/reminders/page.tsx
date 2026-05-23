@@ -6,7 +6,7 @@ import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import PhoneInTalkOutlinedIcon from '@mui/icons-material/PhoneInTalkOutlined';
 import { useCurrency } from '../components/CurrencyContext';
 
-const API = 'http://127.0.0.1:8000/api/crm/dashboard-stats/';
+const API = 'https://ynoah.pythonanywhere.com/api/crm/dashboard-stats/';
 
 interface ExpiringPolicy {
   id: number;

@@ -27,7 +27,7 @@ interface ExpenseRecord {
   notes: string;
 }
 
-const API = 'http://127.0.0.1:8000/api/crm/expenses/';
+const API = 'https://ynoah.pythonanywhere.com/api/crm/expenses/';
 
 const inp: React.CSSProperties = { 
   padding: '0.75rem 1rem', 

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '../components/LanguageContext';
 
-const API = 'http://127.0.0.1:8000/api/crm';
+const API = 'https://ynoah.pythonanywhere.com/api/crm';
 const inp: React.CSSProperties = { padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.05)', color: 'var(--text-main)', outline: 'none', width: '100%', fontFamily: 'inherit', fontSize: '0.95rem' };
 
 interface Client { id: number; first_name: string; second_name: string; third_name: string; last_name: string; email: string; phone: string; client_type?: string; address?: string; }

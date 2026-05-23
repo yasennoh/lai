@@ -26,7 +26,7 @@ export default function SettingsPage() {
       return;
     }
     setUser(parsed);
-    fetch('http://127.0.0.1:8000/api/crm/settings/')
+    fetch('https://ynoah.pythonanywhere.com/api/crm/settings/')
       .then(r => r.json())
       .then(data => {
         setSystemSettings({
@@ -49,7 +49,7 @@ export default function SettingsPage() {
         formData.append('company_logo', systemSettings.company_logo);
       }
 
-      const res = await fetch('http://127.0.0.1:8000/api/crm/settings/', {
+      const res = await fetch('https://ynoah.pythonanywhere.com/api/crm/settings/', {
         method: 'POST',
         body: formData
       });

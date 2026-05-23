@@ -10,7 +10,7 @@ import PhoneInTalkOutlinedIcon from '@mui/icons-material/PhoneInTalkOutlined';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import { useCurrency } from '../components/CurrencyContext';
 
-const API = 'http://127.0.0.1:8000/api/crm/brokers/';
+const API = 'https://ynoah.pythonanywhere.com/api/crm/brokers/';
 
 interface Broker {
   id: number;
@@ -80,8 +80,8 @@ export default function BrokersPage() {
     try {
       const [brokersRes, policiesRes, clientsRes] = await Promise.all([
         fetch(API),
-        fetch('http://127.0.0.1:8000/api/crm/policies/'),
-        fetch('http://127.0.0.1:8000/api/crm/clients/')
+        fetch('https://ynoah.pythonanywhere.com/api/crm/policies/'),
+        fetch('https://ynoah.pythonanywhere.com/api/crm/clients/')
       ]);
       if (brokersRes.ok) setBrokers(await brokersRes.json());
       if (policiesRes.ok) setPolicies(await policiesRes.json());

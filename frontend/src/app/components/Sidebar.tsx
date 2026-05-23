@@ -38,7 +38,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const { t, locale } = useLanguage();
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/crm/settings/')
+    fetch('https://ynoah.pythonanywhere.com/api/crm/settings/')
       .then(res => res.json())
       .then(data => {
         if (data.company_logo) {
@@ -52,7 +52,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     const u = localStorage.getItem('user');
     if (u) {
       setUser(JSON.parse(u));
-      fetch('http://127.0.0.1:8000/api/crm/policies/')
+      fetch('https://ynoah.pythonanywhere.com/api/crm/policies/')
         .then(r => r.ok ? r.json() : [])
         .then(data => {
           const now = new Date();

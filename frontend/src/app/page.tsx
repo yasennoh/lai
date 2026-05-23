@@ -8,7 +8,7 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
-const API = 'http://127.0.0.1:8000/api/crm/dashboard-stats/';
+const API = 'https://ynoah.pythonanywhere.com/api/crm/dashboard-stats/';
 
 export default function Home() {
   const { t, locale } = useLanguage();

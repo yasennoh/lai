@@ -13,7 +13,7 @@ import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
-const API = 'http://127.0.0.1:8000/api/crm';
+const API = 'https://ynoah.pythonanywhere.com/api/crm';
 
 const sColor = (s: string) => s === 'ACTIVE' ? '#10B981' : s === 'PENDING' ? '#F59E0B' : s === 'EXPIRED' ? '#64748B' : '#EF4444';
 

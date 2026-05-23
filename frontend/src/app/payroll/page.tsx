@@ -43,9 +43,9 @@ interface Department {
   name: string;
 }
 
-const API = 'http://127.0.0.1:8000/api/crm/payrolls/';
-const EMP_API = 'http://127.0.0.1:8000/api/crm/employees/';
-const DEPT_API = 'http://127.0.0.1:8000/api/crm/departments/';
+const API = 'https://ynoah.pythonanywhere.com/api/crm/payrolls/';
+const EMP_API = 'https://ynoah.pythonanywhere.com/api/crm/employees/';
+const DEPT_API = 'https://ynoah.pythonanywhere.com/api/crm/departments/';
 
 const inp: React.CSSProperties = { 
   padding: '0.75rem 1rem', 

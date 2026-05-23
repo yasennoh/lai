@@ -7,7 +7,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
 
-const API = 'http://127.0.0.1:8000/api/crm/departments/';
+const API = 'https://ynoah.pythonanywhere.com/api/crm/departments/';
 
 interface Department {
   id: number;
@@ -43,7 +43,7 @@ export default function DepartmentsPage() {
     try {
       const [dRes, eRes] = await Promise.all([
         fetch(API),
-        fetch('http://127.0.0.1:8000/api/crm/employees/')
+        fetch('https://ynoah.pythonanywhere.com/api/crm/employees/')
       ]);
       const depts: Department[] = await dRes.json();
       const emps: any[] = await eRes.json();

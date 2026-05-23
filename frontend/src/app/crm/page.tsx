@@ -89,7 +89,7 @@ const inputStyle: React.CSSProperties = {
 
 const getMediaUrl = (url: string) => {
   if (!url) return '';
-  return url.startsWith('http') ? url : `http://127.0.0.1:8000${url}`;
+  return url.startsWith('http') ? url : `https://ynoah.pythonanywhere.com${url}`;
 };
 
 export default function CRM() {
@@ -128,9 +128,9 @@ export default function CRM() {
   const fetchData = (showLoading = true) => {
     if (showLoading) setLoading(true);
     Promise.all([
-      fetch('http://127.0.0.1:8000/api/crm/clients/').then(r => r.json()),
-      fetch('http://127.0.0.1:8000/api/crm/policies/').then(r => r.json()),
-      fetch('http://127.0.0.1:8000/api/crm/communications/').then(r => r.json()),
+      fetch('https://ynoah.pythonanywhere.com/api/crm/clients/').then(r => r.json()),
+      fetch('https://ynoah.pythonanywhere.com/api/crm/policies/').then(r => r.json()),
+      fetch('https://ynoah.pythonanywhere.com/api/crm/communications/').then(r => r.json()),
     ]).then(([c, p, comm]) => {
       setClients(c);
       setPolicies(p);
@@ -220,7 +220,7 @@ export default function CRM() {
     if (otherDocs) data.append('other_documents', otherDocs);
     const userStr = localStorage.getItem('user');
     if (userStr) data.append('created_by', JSON.parse(userStr).id);
-    const res = await fetch('http://127.0.0.1:8000/api/crm/clients/', { method: 'POST', body: data });
+    const res = await fetch('https://ynoah.pythonanywhere.com/api/crm/clients/', { method: 'POST', body: data });
     if (res.ok) {
       setIsAddClientOpen(false);
       setClientForm({ first_name: '', second_name: '', third_name: '', last_name: '', mother_name: '', grandfather_name: '', email: '', phone: '', phone2: '', address: '', date_of_birth: '', client_type: 'INDIVIDUAL', status: 'LEAD', national_id: '', company_name: '', company_type: '', industry: '', chamber_of_commerce: '', registration_number: '', governorate: '' });
@@ -248,7 +248,7 @@ export default function CRM() {
     if (otherDocs) data.append('other_documents', otherDocs);
     const userStr = localStorage.getItem('user');
     if (userStr) data.append('updated_by', JSON.parse(userStr).id);
-    const res = await fetch(`http://127.0.0.1:8000/api/crm/clients/${selectedClient.id}/`, { method: 'PATCH', body: data });
+    const res = await fetch(`https://ynoah.pythonanywhere.com/api/crm/clients/${selectedClient.id}/`, { method: 'PATCH', body: data });
     if (res.ok) {
       const updated = await res.json();
       setSelectedClient(updated);
@@ -267,14 +267,14 @@ export default function CRM() {
 
   const handleDeleteClient = async (id: number) => {
     if (!confirm(locale === 'ar' ? 'هل أنت متأكد من حذف هذا العميل؟' : 'Are you sure you want to delete this client?')) return;
-    const res = await fetch(`http://127.0.0.1:8000/api/crm/clients/${id}/`, { method: 'DELETE' });
+    const res = await fetch(`https://ynoah.pythonanywhere.com/api/crm/clients/${id}/`, { method: 'DELETE' });
     if (res.ok) { setSelectedClient(null); fetchData(); }
   };
 
   const handleAddComm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedClient) return;
-    const res = await fetch('http://127.0.0.1:8000/api/crm/communications/', {
+    const res = await fetch('https://ynoah.pythonanywhere.com/api/crm/communications/', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...commForm, client: selectedClient.id })
     });
@@ -285,7 +285,7 @@ export default function CRM() {
   const handleRenewPolicy = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPolicy) return;
-    const res = await fetch(`http://127.0.0.1:8000/api/crm/policies/${selectedPolicy.id}/renew/`, {
+    const res = await fetch(`https://ynoah.pythonanywhere.com/api/crm/policies/${selectedPolicy.id}/renew/`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(renewForm)
     });

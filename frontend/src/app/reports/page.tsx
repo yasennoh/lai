@@ -134,9 +134,9 @@ export default function Reports() {
     if (JSON.parse(user).role !== 'ADMIN') { router.push('/crm'); return; }
 
     Promise.all([
-      fetch('http://127.0.0.1:8000/api/crm/clients/').then(r => r.json()),
-      fetch('http://127.0.0.1:8000/api/crm/policies/').then(r => r.json()),
-      fetch('http://127.0.0.1:8000/api/crm/claims/').then(r => r.json())
+      fetch('https://ynoah.pythonanywhere.com/api/crm/clients/').then(r => r.json()),
+      fetch('https://ynoah.pythonanywhere.com/api/crm/policies/').then(r => r.json()),
+      fetch('https://ynoah.pythonanywhere.com/api/crm/claims/').then(r => r.json())
     ]).then(([c, p, cl]) => {
       setClients(c);
       setPolicies(p);

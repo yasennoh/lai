@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '../components/LanguageContext';
 
-const API = 'http://127.0.0.1:8000/api/crm';
+const API = 'https://ynoah.pythonanywhere.com/api/crm';
 
 export default function TemplatesPage() {
   const { t, locale } = useLanguage();

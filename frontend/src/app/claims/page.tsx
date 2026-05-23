@@ -60,9 +60,9 @@ export default function Claims() {
   const fetchData = () => {
     setLoading(true);
     Promise.all([
-      fetch('http://127.0.0.1:8000/api/crm/claims/').then(res => res.ok ? res.json() : []),
-      fetch('http://127.0.0.1:8000/api/crm/policies/').then(res => res.ok ? res.json() : []),
-      fetch('http://127.0.0.1:8000/api/crm/clients/').then(res => res.ok ? res.json() : [])
+      fetch('https://ynoah.pythonanywhere.com/api/crm/claims/').then(res => res.ok ? res.json() : []),
+      fetch('https://ynoah.pythonanywhere.com/api/crm/policies/').then(res => res.ok ? res.json() : []),
+      fetch('https://ynoah.pythonanywhere.com/api/crm/clients/').then(res => res.ok ? res.json() : [])
     ]).then(([claimsData, policiesData, clientsData]) => {
       setClaims(claimsData);
       setPolicies(policiesData);
@@ -95,13 +95,13 @@ export default function Claims() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this claim?')) return;
-    const res = await fetch(`http://127.0.0.1:8000/api/crm/claims/${id}/`, { method: 'DELETE' });
+    const res = await fetch(`https://ynoah.pythonanywhere.com/api/crm/claims/${id}/`, { method: 'DELETE' });
     if (res.ok) fetchData();
   };
 
   const handleAddClaim = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch('http://127.0.0.1:8000/api/crm/claims/', {
+    const res = await fetch('https://ynoah.pythonanywhere.com/api/crm/claims/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(claimForm)
@@ -142,7 +142,7 @@ export default function Claims() {
   const handleEditClaim = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedClaim) return;
-    const res = await fetch(`http://127.0.0.1:8000/api/crm/claims/${selectedClaim.id}/`, {
+    const res = await fetch(`https://ynoah.pythonanywhere.com/api/crm/claims/${selectedClaim.id}/`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(editForm)

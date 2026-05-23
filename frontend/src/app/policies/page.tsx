@@ -24,7 +24,7 @@ interface Policy {
 }
 interface Client { id: number; first_name: string; second_name: string; third_name: string; last_name: string; national_id: string; phone: string; email: string; address: string; }
 
-const API = 'http://127.0.0.1:8000/api/crm';
+const API = 'https://ynoah.pythonanywhere.com/api/crm';
 const inp: React.CSSProperties = { padding:'0.75rem 1rem', borderRadius:'8px', border:'1px solid var(--glass-border)', background:'rgba(0,0,0,0.05)', color:'var(--text-main)', outline:'none', width:'100%', fontFamily:'inherit', fontSize:'0.95rem' };
 
 export default function Policies() {

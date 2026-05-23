@@ -14,9 +14,9 @@ import ApartmentOutlinedIcon from '@mui/icons-material/ApartmentOutlined';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
 import { useCurrency } from '../components/CurrencyContext';
 
-const EMP_API = 'http://127.0.0.1:8000/api/crm/employees/';
-const DEPT_API = 'http://127.0.0.1:8000/api/crm/departments/';
-const MEDIA_BASE = 'http://127.0.0.1:8000';
+const EMP_API = 'https://ynoah.pythonanywhere.com/api/crm/employees/';
+const DEPT_API = 'https://ynoah.pythonanywhere.com/api/crm/departments/';
+const MEDIA_BASE = 'https://ynoah.pythonanywhere.com';
 
 interface Department { id: number; name: string; }
 interface Employee {
