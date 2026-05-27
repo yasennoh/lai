@@ -107,7 +107,7 @@ export default function AdminPanel() {
     const u = localStorage.getItem('user');
     if (!u) { router.push('/login'); return; }
     const parsed = JSON.parse(u);
-    if (parsed.role !== 'ADMIN') { router.push('/login'); return; }
+    if (!['ADMIN', 'AUDITOR', 'ACCOUNTANT'].includes(parsed.role)) { router.push('/login'); return; }
     setUser(parsed);
     fetchAll();
   }, []);
@@ -122,6 +122,10 @@ export default function AdminPanel() {
 
   const clientName = (id: number) => { const c = clients.find(x => x.id === id); return c ? `${c.first_name} ${c.last_name}` : '—'; };
 
+  const handleReview = async (id: number) => {
+    await fetch(`${API}/policies/${id}/review/`, { method: 'POST' });
+    fetchAll();
+  };
   const handleApprove = async (id: number) => {
     await fetch(`${API}/policies/${id}/approve/`, { method: 'POST' });
     fetchAll();
@@ -130,6 +134,15 @@ export default function AdminPanel() {
     await fetch(`${API}/policies/${id}/reject/`, { method: 'POST' });
     fetchAll();
   };
+  const handleAwaitPayment = async (id: number) => {
+    await fetch(`${API}/policies/${id}/await_payment/`, { method: 'POST' });
+    fetchAll();
+  };
+  const handleActivate = async (id: number) => {
+    await fetch(`${API}/policies/${id}/activate/`, { method: 'POST' });
+    fetchAll();
+  };
+
   const handleDelete = async (id: number) => {
     if (!confirm('هل أنت متأكد من الحذف؟')) return;
     await fetch(`${API}/policies/${id}/`, { method: 'DELETE' });
@@ -239,47 +252,77 @@ export default function AdminPanel() {
     <div style={{ direction: isRtl ? 'rtl' : 'ltr', padding: '2rem', minHeight: '100vh', background: 'var(--background)' }}>
       {/* Breadcrumb Header */}
       <div className="card" style={{ marginBottom: '1.5rem', padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '8px' }}>
-        <h1 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 'bold', color: 'var(--text-main)' }}>{t('staffManagement')}</h1>
+        <h1 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 'bold', color: 'var(--text-main)' }}>
+          {user.role === 'ADMIN' ? t('staffManagement') : user.role === 'AUDITOR' ? (locale === 'ar' ? 'لوحة التدقيق الفني للوثائق' : 'Technical Audit Panel') : (locale === 'ar' ? 'لوحة العمليات المالية والمحاسبة' : 'Financial Accounting Panel')}
+        </h1>
         <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Dashboard / Admin Panel</span>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '1.25rem', marginBottom: '2rem' }}>
-        {[
-          { l: t('pendingPoliciesTab'), v: pending.length, c: '#F59E0B', icon: PendingActionsOutlinedIcon },
-          { l: t('activePoliciesCount'), v: active.length, c: '#10B981', icon: CheckCircleOutlineOutlinedIcon },
-          { l: t('totalClients'), v: clients.length, c: '#3B82F6', icon: PeopleAltOutlinedIcon },
-          { l: t('totalPremiums'), v: formatAmount(totalPrem.toString()), c: '#8B5CF6', icon: AccountBalanceWalletOutlinedIcon },
-          { l: t('totalCoverage'), v: formatAmount(totalCov.toString()), c: '#EC4899', icon: SecurityOutlinedIcon },
-        ].map((s, i) => {
-          const Icon = s.icon;
-          return (
-            <div key={i} className="glass-panel" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: `${s.c}15`, color: s.c }}>
-                <Icon style={{ fontSize: '1.25rem' }} />
+        {(() => {
+          let kpis = [];
+          if (user.role === 'AUDITOR') {
+            kpis = [
+              { l: locale === 'ar' ? 'بانتظار التدقيق' : 'Awaiting Audit', v: policies.filter(p => p.status === 'PENDING').length, c: '#F59E0B', icon: PendingActionsOutlinedIcon },
+              { l: locale === 'ar' ? 'قيد التدقيق' : 'Under Review', v: policies.filter(p => p.status === 'UNDER_REVIEW').length, c: '#3B82F6', icon: DescriptionOutlinedIcon },
+              { l: locale === 'ar' ? 'المعتمدة فنيّاً' : 'Approved Policies', v: policies.filter(p => p.status === 'APPROVED').length, c: '#8B5CF6', icon: CheckCircleOutlineOutlinedIcon },
+              { l: locale === 'ar' ? 'المرفوضة' : 'Rejected Policies', v: policies.filter(p => p.status === 'REJECTED').length, c: '#EF4444', icon: CancelOutlinedIcon },
+              { l: locale === 'ar' ? 'مجموع الوثائق' : 'Total Policies', v: policies.length, c: '#64748B', icon: DescriptionOutlinedIcon },
+            ];
+          } else if (user.role === 'ACCOUNTANT') {
+            const awaitingPaymentPolicies = policies.filter(p => p.status === 'AWAITING_PAYMENT');
+            const totalAwaitingPayment = awaitingPaymentPolicies.reduce((s, p) => s + parseFloat(p.premium_amount || '0'), 0);
+            kpis = [
+              { l: locale === 'ar' ? 'معتمدة (بانتظار الفاتورة)' : 'Approved Policies', v: policies.filter(p => p.status === 'APPROVED').length, c: '#8B5CF6', icon: CheckCircleOutlineOutlinedIcon },
+              { l: locale === 'ar' ? 'بانتظار الدفع' : 'Awaiting Payment', v: awaitingPaymentPolicies.length, c: '#EC4899', icon: PendingActionsOutlinedIcon },
+              { l: locale === 'ar' ? 'الوثائق الفعالة' : 'Active Policies', v: active.length, c: '#10B981', icon: CheckCircleOutlineOutlinedIcon },
+              { l: locale === 'ar' ? 'المبالغ المحصلة' : 'Collected Amount', v: formatAmount(totalPrem.toString()), c: '#10B981', icon: AccountBalanceWalletOutlinedIcon },
+              { l: locale === 'ar' ? 'الديون المستحقة' : 'Outstanding Amount', v: formatAmount(totalAwaitingPayment.toString()), c: '#EF4444', icon: AccountBalanceWalletOutlinedIcon },
+            ];
+          } else {
+            kpis = [
+              { l: t('pendingPoliciesTab'), v: pending.length, c: '#F59E0B', icon: PendingActionsOutlinedIcon },
+              { l: t('activePoliciesCount'), v: active.length, c: '#10B981', icon: CheckCircleOutlineOutlinedIcon },
+              { l: t('totalClients'), v: clients.length, c: '#3B82F6', icon: PeopleAltOutlinedIcon },
+              { l: t('totalPremiums'), v: formatAmount(totalPrem.toString()), c: '#8B5CF6', icon: AccountBalanceWalletOutlinedIcon },
+              { l: t('totalCoverage'), v: formatAmount(totalCov.toString()), c: '#EC4899', icon: SecurityOutlinedIcon },
+            ];
+          }
+
+          return kpis.map((s, i) => {
+            const Icon = s.icon;
+            return (
+              <div key={i} className="glass-panel" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: `${s.c}15`, color: s.c }}>
+                  <Icon style={{ fontSize: '1.25rem' }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: s.c }}>{s.v}</div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{s.l}</div>
+                </div>
               </div>
-              <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: s.c }}>{s.v}</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{s.l}</div>
-              </div>
-            </div>
-          );
-        })}
+            );
+          });
+        })()}
       </div>
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
         {[
-          { k: 'pending', l: t('pendingPoliciesTab'), n: pending.length },
-        { k: 'all', l: t('allPoliciesTab'), n: policies.length },
-        { k: 'claims', l: t('claims'), n: claims.length }
-      ].map(t => (
-        <button key={t.k} onClick={() => setTab(t.k)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', fontSize: '0.9rem', background: tab === t.k ? 'var(--secondary)' : 'rgba(0,0,0,0.05)', color: tab === t.k ? 'white' : 'var(--text-muted)', transition: 'all 0.2s' }}>
-          {t.l} ({t.n})
-        </button>
-      ))}
+          { k: 'pending', l: user.role === 'ADMIN' ? t('pendingPoliciesTab') : user.role === 'AUDITOR' ? (locale === 'ar' ? 'قيد المراجعة والتدقيق' : 'Awaiting Audit') : (locale === 'ar' ? 'التحصيل والتفعيل' : 'Awaiting Payment'), n: pending.length },
+          ...(user.role === 'ADMIN' ? [
+            { k: 'all', l: t('allPoliciesTab'), n: policies.length },
+            { k: 'claims', l: t('claims'), n: claims.length }
+          ] : user.role === 'ACCOUNTANT' ? [
+            { k: 'claims', l: t('claims'), n: claims.length }
+          ] : [])
+        ].map(t => (
+          <button key={t.k} onClick={() => setTab(t.k)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', fontSize: '0.9rem', background: tab === t.k ? 'var(--secondary)' : 'rgba(0,0,0,0.05)', color: tab === t.k ? 'white' : 'var(--text-muted)', transition: 'all 0.2s' }}>
+            {t.l} ({t.n})
+          </button>
+        ))}
       </div>
 
-      {/* Pending Policies */}
       {tab === 'pending' && (
         <div className="glass-panel" style={{ padding: '1.5rem' }}>
           <h2 style={{ marginBottom: '1rem' }}>{t('policiesAwaitingApproval')}</h2>
@@ -294,8 +337,25 @@ export default function AdminPanel() {
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem' }} onClick={e => e.stopPropagation()}>
                     <button onClick={() => { setSelectedPolicy(p); setIsDetailModalOpen(true); }} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#3B82F6', color: 'white' }}>{t('openPolicy')}</button>
-                    <button onClick={() => handleApprove(p.id)} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#10B981', color: 'white' }}>{t('approve')}</button>
-                    <button onClick={() => handleReject(p.id)} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#EF4444', color: 'white' }}>{t('reject')}</button>
+                    
+                    {p.status === 'PENDING' && (user.role === 'ADMIN' || user.role === 'AUDITOR') && (
+                      <button onClick={() => handleReview(p.id)} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#3B82F6', color: 'white' }}>{locale === 'ar' ? 'بدء التدقيق' : 'Start Review'}</button>
+                    )}
+                    
+                    {p.status === 'UNDER_REVIEW' && (user.role === 'ADMIN' || user.role === 'AUDITOR') && (
+                      <>
+                        <button onClick={() => handleApprove(p.id)} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#10B981', color: 'white' }}>{locale === 'ar' ? 'موافقة فنية' : 'Approve'}</button>
+                        <button onClick={() => handleReject(p.id)} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#EF4444', color: 'white' }}>{locale === 'ar' ? 'رفض فني' : 'Reject'}</button>
+                      </>
+                    )}
+                    
+                    {p.status === 'APPROVED' && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
+                      <button onClick={() => handleAwaitPayment(p.id)} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#EC4899', color: 'white' }}>{locale === 'ar' ? 'طلب الدفع' : 'Request Payment'}</button>
+                    )}
+                    
+                    {p.status === 'AWAITING_PAYMENT' && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
+                      <button onClick={() => handleActivate(p.id)} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#10B981', color: 'white' }}>{locale === 'ar' ? 'تأكيد الدفع والتفعيل' : 'Confirm & Activate'}</button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -812,15 +872,30 @@ export default function AdminPanel() {
 
 
                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: '2rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1.5rem', flexWrap: 'wrap' }}>
-                  {selectedPolicy.status === 'PENDING' && (
+                  {selectedPolicy.status === 'PENDING' && (user.role === 'ADMIN' || user.role === 'AUDITOR') && (
+                    <button onClick={async () => { await handleReview(selectedPolicy.id); setIsDetailModalOpen(false); alert(locale === 'ar' ? 'تم بدء التدقيق الفني للوثيقة' : 'Auditing started'); }} style={{ flex: 1, minWidth: '120px', padding: '0.75rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#3B82F6', color: 'white' }}>
+                      {locale === 'ar' ? 'بدء التدقيق' : 'Start Review'}
+                    </button>
+                  )}
+                  {selectedPolicy.status === 'UNDER_REVIEW' && (user.role === 'ADMIN' || user.role === 'AUDITOR') && (
                     <>
-                      <button onClick={async () => { await handleApprove(selectedPolicy.id); setIsDetailModalOpen(false); alert('تمت الموافقة بنجاح وتفعيل الوثيقة'); }} style={{ flex: 1, minWidth: '120px', padding: '0.75rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#10B981', color: 'white' }}>
-                        موافقة وتفعيل
+                      <button onClick={async () => { await handleApprove(selectedPolicy.id); setIsDetailModalOpen(false); alert(locale === 'ar' ? 'تمت الموافقة الفنية على الوثيقة' : 'Policy approved'); }} style={{ flex: 1, minWidth: '120px', padding: '0.75rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#10B981', color: 'white' }}>
+                        {locale === 'ar' ? 'موافقة فنية' : 'Approve'}
                       </button>
-                      <button onClick={async () => { await handleReject(selectedPolicy.id); setIsDetailModalOpen(false); alert('تم رفض الوثيقة'); }} style={{ flex: 1, minWidth: '120px', padding: '0.75rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#EF4444', color: 'white' }}>
-                        رفض الوثيقة
+                      <button onClick={async () => { await handleReject(selectedPolicy.id); setIsDetailModalOpen(false); alert(locale === 'ar' ? 'تم رفض الوثيقة فنيّاً' : 'Policy rejected'); }} style={{ flex: 1, minWidth: '120px', padding: '0.75rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#EF4444', color: 'white' }}>
+                        {locale === 'ar' ? 'رفض فني' : 'Reject'}
                       </button>
                     </>
+                  )}
+                  {selectedPolicy.status === 'APPROVED' && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
+                    <button onClick={async () => { await handleAwaitPayment(selectedPolicy.id); setIsDetailModalOpen(false); alert(locale === 'ar' ? 'تم إرسال طلب الدفع للبوليصة' : 'Payment requested'); }} style={{ flex: 1, minWidth: '120px', padding: '0.75rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#EC4899', color: 'white' }}>
+                      {locale === 'ar' ? 'طلب الدفع' : 'Request Payment'}
+                    </button>
+                  )}
+                  {selectedPolicy.status === 'AWAITING_PAYMENT' && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
+                    <button onClick={async () => { await handleActivate(selectedPolicy.id); setIsDetailModalOpen(false); alert(locale === 'ar' ? 'تم تأكيد الدفع وتفعيل البوليصة' : 'Policy activated'); }} style={{ flex: 1, minWidth: '120px', padding: '0.75rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#10B981', color: 'white' }}>
+                      {locale === 'ar' ? 'تأكيد الدفع والتفعيل' : 'Confirm Payment & Activate'}
+                    </button>
                   )}
                   <button onClick={() => { setIsDetailModalOpen(false); }} style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: '1px solid var(--text-muted)', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', color: 'var(--text-main)' }}>
                     إغلاق

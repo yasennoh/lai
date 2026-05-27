@@ -135,7 +135,11 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         <nav style={{ display: 'flex', flexDirection: 'column', marginBottom: '1.5rem' }}>
           {(!user || user.role !== 'DATA_ENTRY') && renderLink('/', t('dashboard'), GridViewOutlinedIcon)}
-          {user?.role === 'ADMIN' && renderLink('/admin-panel', t('staffManagement'), PeopleAltOutlinedIcon)}
+          {user && ['ADMIN', 'AUDITOR', 'ACCOUNTANT'].includes(user.role) && renderLink(
+            '/admin-panel', 
+            user.role === 'ADMIN' ? t('staffManagement') : user.role === 'AUDITOR' ? (locale === 'ar' ? 'لوحة التدقيق' : 'Auditor Panel') : (locale === 'ar' ? 'لوحة المحاسبة' : 'Accountant Panel'), 
+            PeopleAltOutlinedIcon
+          )}
         </nav>
 
         {/* Client Management Section */}
@@ -164,9 +168,9 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             {renderLink('/data-entry', t('dataEntry'), BadgeOutlinedIcon)}
             {renderLink('/policies', t('policies'), DescriptionOutlinedIcon)}
             {renderLink('/claims', t('claims'), GavelOutlinedIcon)}
-            {(!user || user.role !== 'DATA_ENTRY') && renderLink('/reports', t('reports'), BarChartOutlinedIcon)}
-            {(!user || user.role !== 'DATA_ENTRY') && renderLink('/payroll', t('payroll'), AccountBalanceWalletOutlinedIcon)}
-            {(!user || user.role !== 'DATA_ENTRY') && renderLink('/expenses', t('expenses'), ReceiptLongOutlinedIcon)}
+            {user && ['ADMIN', 'ACCOUNTANT'].includes(user.role) && renderLink('/reports', t('reports'), BarChartOutlinedIcon)}
+            {user && ['ADMIN', 'ACCOUNTANT'].includes(user.role) && renderLink('/payroll', t('payroll'), AccountBalanceWalletOutlinedIcon)}
+            {user && ['ADMIN', 'ACCOUNTANT'].includes(user.role) && renderLink('/expenses', t('expenses'), ReceiptLongOutlinedIcon)}
           </nav>
         </div>
 

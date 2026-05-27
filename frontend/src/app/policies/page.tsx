@@ -13,6 +13,7 @@ interface Policy {
   payment_frequency: string; payment_method: string;
   beneficiary_name: string; beneficiary_relation: string; beneficiary_phone: string;
   insured_item_details: string; notes: string; created_at: string;
+  created_by?: number;
   created_by_name?: string; updated_by_name?: string;
   issue_date?: string; currency: string; net_premium: string;
   stamp_duty_percentage: string; stamp_duty_amount: string;
@@ -31,7 +32,17 @@ export default function Policies() {
   const { t, locale } = useLanguage();
   
   const typeLabels: Record<string,string> = { AUTO: t('typeAuto'), HEALTH: t('typeHealth'), LIFE: t('typeLife'), PROPERTY: t('typeProperty'), TRAVEL: t('typeTravel'), MARINE: t('typeMarine'), FIRE: t('typeFire'), LIABILITY: t('typeLiability'), ENGINEERING: t('typeEngineering') };
-  const statusLabels: Record<string,string> = { ACTIVE: t('statusActive'), EXPIRED: t('statusExpired'), CANCELLED: t('statusCancelled'), PENDING: t('statusPending'), SUSPENDED: t('statusSuspended') };
+  const statusLabels: Record<string,string> = {
+    PENDING: t('statusPending'),
+    UNDER_REVIEW: t('statusUnderReview'),
+    APPROVED: t('statusApproved'),
+    REJECTED: t('statusRejected'),
+    AWAITING_PAYMENT: t('statusAwaitingPayment'),
+    ACTIVE: t('statusActive'),
+    EXPIRED: t('statusExpired'),
+    CANCELLED: t('statusCancelled'),
+    SUSPENDED: t('statusSuspended')
+  };
   const freqLabels: Record<string,string> = { MONTHLY: t('freqMonthly'), QUARTERLY: t('freqQuarterly'), SEMI_ANNUAL: t('freqSemiAnnual'), ANNUAL: t('freqAnnual'), ONE_TIME: t('freqOneTime') };
   const payLabels: Record<string,string> = { CASH: t('payCash'), BANK_TRANSFER: t('payBank'), CREDIT_CARD: t('payCredit'), CHECK: t('payCheck') };
   
@@ -47,7 +58,18 @@ export default function Policies() {
     return p.status;
   };
   
-  const statusColor = (s:string) => s==='ACTIVE'?'#10B981':s==='PENDING'?'#F59E0B':s==='EXPIRED'?'#64748B':'#EF4444';
+  const statusColor = (s:string) => {
+    switch(s) {
+      case 'ACTIVE': return '#10B981';
+      case 'PENDING': return '#F59E0B';
+      case 'UNDER_REVIEW': return '#3B82F6';
+      case 'APPROVED': return '#8B5CF6';
+      case 'REJECTED': return '#EF4444';
+      case 'AWAITING_PAYMENT': return '#EC4899';
+      case 'EXPIRED': return '#64748B';
+      default: return '#EF4444';
+    }
+  };
   const { formatAmount } = useCurrency();
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -71,10 +93,15 @@ export default function Policies() {
   const [isEditMode, setIsEditMode] = useState(false);
 
   const [userRole, setUserRole] = useState('');
+  const [userId, setUserId] = useState<number | null>(null);
   const fetchData = () => { setLoading(true); Promise.all([fetch(`${API}/policies/`).then(r=>r.json()), fetch(`${API}/clients/`).then(r=>r.json()), fetch(`${API}/templates/`).then(r=>r.json()), fetch(`${API}/settings/`).then(r=>r.json()), fetch(`${API}/brokers/`).then(r=>r.json())]).then(([p,c,t,s,b])=>{setPolicies(p);setClients(c);setTemplates(t);setSystemSettings(s);setBrokers(b);setLoading(false);}).catch(()=>setLoading(false)); };
   useEffect(()=>{
     const u = localStorage.getItem('user');
-    if (u) setUserRole(JSON.parse(u).role);
+    if (u) {
+      const parsed = JSON.parse(u);
+      setUserRole(parsed.role);
+      setUserId(parsed.id);
+    }
     fetchData();
   },[]);
 
@@ -178,6 +205,16 @@ export default function Policies() {
     }
   };
 
+  const handleReview = async () => {
+    if(!selected) return;
+    const res = await fetch(`${API}/policies/${selected.id}/review/`, { method: 'POST' });
+    if(res.ok) {
+      alert(locale === 'ar' ? 'تم بدء التدقيق الفني للوثيقة' : 'Auditing started');
+      fetchData();
+      setSelected({...selected, status: 'UNDER_REVIEW'});
+    } else alert(t('saveError'));
+  };
+
   const handleApprove = async () => {
     if(!selected) return;
     if(!confirm(t('msgConfirmApprove'))) return;
@@ -185,8 +222,39 @@ export default function Policies() {
     if(res.ok) {
       alert(t('msgApproveSuccess'));
       fetchData();
-      setSelected({...selected, status: 'ACTIVE'});
+      setSelected({...selected, status: 'APPROVED'});
     } else alert(t('msgApproveError'));
+  };
+
+  const handleReject = async () => {
+    if(!selected) return;
+    if(!confirm(locale === 'ar' ? 'هل أنت متأكد من رفض الوثيقة فنيّاً؟' : 'Are you sure you want to reject this policy?')) return;
+    const res = await fetch(`${API}/policies/${selected.id}/reject/`, { method: 'POST' });
+    if(res.ok) {
+      alert(locale === 'ar' ? 'تم رفض الوثيقة فنيّاً' : 'Policy rejected');
+      fetchData();
+      setSelected({...selected, status: 'REJECTED'});
+    } else alert(t('saveError'));
+  };
+
+  const handleAwaitPayment = async () => {
+    if(!selected) return;
+    const res = await fetch(`${API}/policies/${selected.id}/await_payment/`, { method: 'POST' });
+    if(res.ok) {
+      alert(locale === 'ar' ? 'تم إرسال طلب الدفع للبوليصة' : 'Payment requested');
+      fetchData();
+      setSelected({...selected, status: 'AWAITING_PAYMENT'});
+    } else alert(t('saveError'));
+  };
+
+  const handleActivate = async () => {
+    if(!selected) return;
+    const res = await fetch(`${API}/policies/${selected.id}/activate/`, { method: 'POST' });
+    if(res.ok) {
+      alert(locale === 'ar' ? 'تم تأكيد الدفع وتفعيل البوليصة بنجاح' : 'Policy activated successfully');
+      fetchData();
+      setSelected({...selected, status: 'ACTIVE'});
+    } else alert(t('saveError'));
   };
 
   const handleRenewPolicy = async (e: React.FormEvent) => {
@@ -353,20 +421,44 @@ export default function Policies() {
                   <p style={{margin:0,color:'var(--text-muted)',fontSize:'0.9rem', marginTop: '0.2rem'}}>{typeLabels[selected.policy_type]} • {clientName(selected.client)}</p>
                 </div>
                 <div style={{display:'flex',gap:'0.5rem', alignItems: 'center'}}>
+                  {/* Renew Action */}
                   {(getTrueStatus(selected) === 'ACTIVE' || getTrueStatus(selected) === 'EXPIRED') && (
                     <button onClick={() => { setRenewForm({ start_date: '', end_date: '', premium_amount: selected.premium_amount || '' }); setIsRenewModalOpen(true); }} style={{...inp,width:'auto',padding:'0.5rem 1rem',cursor:'pointer',background:'rgba(139,92,246,0.15)',color:'#8B5CF6',border:'1px solid #8B5CF6',borderRadius:'8px',fontSize:'0.9rem'}}>{locale === 'ar' ? 'تجديد' : 'Renew'}</button>
                   )}
-                  {userRole === 'ADMIN' && getTrueStatus(selected) === 'PENDING' && (
-                    <button onClick={handleApprove} style={{...inp,width:'auto',padding:'0.5rem 1rem',cursor:'pointer',background:'rgba(16,185,129,0.15)',color:'#10B981',border:'1px solid #10B981',borderRadius:'8px',fontSize:'0.9rem'}}>{locale === 'ar' ? 'موافقة (تفعيل)' : 'Approve (Activate)'}</button>
-                  )}
-                  {(getTrueStatus(selected) === 'ACTIVE' || getTrueStatus(selected) === 'PENDING') && (
+
+                  {/* Edit Action (Draft only) */}
+                  {getTrueStatus(selected) === 'PENDING' && (
                     <button onClick={() => { setIsEditMode(true); setForm(selected); setIsModalOpen(true); }} style={{...inp,width:'auto',padding:'0.5rem 1rem',cursor:'pointer',background:'rgba(245,158,11,0.15)',color:'#F59E0B',border:'1px solid #F59E0B',borderRadius:'8px',fontSize:'0.9rem'}}>{locale === 'ar' ? 'تعديل' : 'Edit'}</button>
                   )}
-                  {!(userRole === 'DATA_ENTRY' && getTrueStatus(selected) === 'PENDING') ? (
-                    <button onClick={handlePrint} style={{...inp,width:'auto',padding:'0.5rem 1rem',cursor:'pointer',background:'rgba(59,130,246,0.15)',color:'#3B82F6',border:'1px solid #3B82F6',borderRadius:'8px',fontSize:'0.9rem'}}>{locale === 'ar' ? 'طباعة' : 'Print'}</button>
-                  ) : (
-                    <button disabled style={{...inp,width:'auto',padding:'0.5rem 1rem',cursor:'not-allowed',background:'rgba(100,116,139,0.15)',color:'#64748B',border:'1px solid #64748B',borderRadius:'8px',fontSize:'0.9rem'}}>{locale === 'ar' ? 'بانتظار الموافقة للطباعة' : 'Awaiting Approval to Print'}</button>
+
+                  {/* Auditor Actions */}
+                  {getTrueStatus(selected) === 'PENDING' && (userRole === 'ADMIN' || userRole === 'AUDITOR') && (
+                    <button onClick={handleReview} style={{...inp,width:'auto',padding:'0.5rem 1rem',cursor:'pointer',background:'rgba(59,130,246,0.15)',color:'#3B82F6',border:'1px solid #3B82F6',borderRadius:'8px',fontSize:'0.9rem'}}>{locale === 'ar' ? 'بدء التدقيق' : 'Start Review'}</button>
                   )}
+                  {getTrueStatus(selected) === 'UNDER_REVIEW' && (userRole === 'ADMIN' || userRole === 'AUDITOR') && (
+                    <>
+                      <button onClick={handleApprove} style={{...inp,width:'auto',padding:'0.5rem 1rem',cursor:'pointer',background:'rgba(16,185,129,0.15)',color:'#10B981',border:'1px solid #10B981',borderRadius:'8px',fontSize:'0.9rem'}}>{locale === 'ar' ? 'موافقة فنية' : 'Approve'}</button>
+                      <button onClick={handleReject} style={{...inp,width:'auto',padding:'0.5rem 1rem',cursor:'pointer',background:'rgba(239,68,68,0.15)',color:'#EF4444',border:'1px solid #EF4444',borderRadius:'8px',fontSize:'0.9rem'}}>{locale === 'ar' ? 'رفض فني' : 'Reject'}</button>
+                    </>
+                  )}
+
+                  {/* Accountant Actions */}
+                  {getTrueStatus(selected) === 'APPROVED' && (userRole === 'ADMIN' || userRole === 'ACCOUNTANT') && (
+                    <button onClick={handleAwaitPayment} style={{...inp,width:'auto',padding:'0.5rem 1rem',cursor:'pointer',background:'rgba(236,72,153,0.15)',color:'#EC4899',border:'1px solid #EC4899',borderRadius:'8px',fontSize:'0.9rem'}}>{locale === 'ar' ? 'طلب الدفع' : 'Request Payment'}</button>
+                  )}
+                  {getTrueStatus(selected) === 'AWAITING_PAYMENT' && (userRole === 'ADMIN' || userRole === 'ACCOUNTANT') && (
+                    <button onClick={handleActivate} style={{...inp,width:'auto',padding:'0.5rem 1rem',cursor:'pointer',background:'rgba(16,185,129,0.15)',color:'#10B981',border:'1px solid #10B981',borderRadius:'8px',fontSize:'0.9rem'}}>{locale === 'ar' ? 'تأكيد الدفع والتفعيل' : 'Confirm Payment & Activate'}</button>
+                  )}
+
+                  {/* Print Action (Only ACTIVE and either Creator or Admin) */}
+                  {getTrueStatus(selected) === 'ACTIVE' && (userRole === 'ADMIN' || selected.created_by === userId) ? (
+                    <button onClick={handlePrint} style={{...inp,width:'auto',padding:'0.5rem 1rem',cursor:'pointer',background:'rgba(59,130,246,0.15)',color:'#3B82F6',border:'1px solid #3B82F6',borderRadius:'8px',fontSize:'0.9rem'}}>{locale === 'ar' ? 'طباعة' : 'Print'}</button>
+                  ) : getTrueStatus(selected) === 'ACTIVE' ? (
+                    <button disabled title={locale === 'ar' ? 'يمكن طباعة البوليصة فقط من قبل الموظف الذي رفعها أو المدير' : 'Only the creator or admin can print this policy'} style={{...inp,width:'auto',padding:'0.5rem 1rem',cursor:'not-allowed',background:'rgba(100,116,139,0.15)',color:'#64748B',border:'1px solid #64748B',borderRadius:'8px',fontSize:'0.9rem'}}>{locale === 'ar' ? 'طباعة محظورة' : 'Print Restricted'}</button>
+                  ) : (
+                    <button disabled title={locale === 'ar' ? 'يمكن طباعة البوليصة فقط عندما تكون مفعّلة' : 'Policy must be active to print'} style={{...inp,width:'auto',padding:'0.5rem 1rem',cursor:'not-allowed',background:'rgba(100,116,139,0.15)',color:'#64748B',border:'1px solid #64748B',borderRadius:'8px',fontSize:'0.9rem'}}>{locale === 'ar' ? 'بانتظار التفعيل للطباعة' : 'Awaiting Activation to Print'}</button>
+                  )}
+
                   <button onClick={() => setSelected(null)} style={{...inp,width:'auto',padding:'0.5rem 1rem',cursor:'pointer',background:'transparent',color:'var(--text-main)',border:'1px solid var(--text-muted)',borderRadius:'8px',fontSize:'0.9rem'}}>{locale === 'ar' ? 'إغلاق' : 'Close'}</button>
                 </div>
               </div>

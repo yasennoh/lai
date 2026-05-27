@@ -5,6 +5,8 @@ class UserProfile(models.Model):
     ROLE_CHOICES = [
         ('ADMIN', 'مدير النظام'),
         ('DATA_ENTRY', 'مدخل بيانات'),
+        ('AUDITOR', 'مدقق فني'),
+        ('ACCOUNTANT', 'محاسب'),
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='DATA_ENTRY')
@@ -130,10 +132,14 @@ class Policy(models.Model):
         ('ENGINEERING', 'Engineering Insurance'),
     ]
     STATUS_CHOICES = [
+        ('PENDING', 'Pending/Draft'),
+        ('UNDER_REVIEW', 'Under Review'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+        ('AWAITING_PAYMENT', 'Awaiting Payment'),
         ('ACTIVE', 'Active'),
         ('EXPIRED', 'Expired'),
         ('CANCELLED', 'Cancelled'),
-        ('PENDING', 'Pending Approval'),
         ('SUSPENDED', 'Suspended'),
     ]
     PAYMENT_FREQUENCY = [

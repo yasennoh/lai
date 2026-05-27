@@ -48,18 +48,39 @@ class PolicyViewSet(viewsets.ModelViewSet):
     serializer_class = PolicySerializer
 
     @action(detail=True, methods=['post'])
+    def review(self, request, pk=None):
+        policy = self.get_object()
+        policy.status = 'UNDER_REVIEW'
+        policy.save()
+        return Response({'status': 'under_review'})
+
+    @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
         policy = self.get_object()
-        policy.status = 'ACTIVE'
+        policy.status = 'APPROVED'
         policy.save()
         return Response({'status': 'approved'})
 
     @action(detail=True, methods=['post'])
     def reject(self, request, pk=None):
         policy = self.get_object()
-        policy.status = 'CANCELLED'
+        policy.status = 'REJECTED'
         policy.save()
         return Response({'status': 'rejected'})
+
+    @action(detail=True, methods=['post'])
+    def await_payment(self, request, pk=None):
+        policy = self.get_object()
+        policy.status = 'AWAITING_PAYMENT'
+        policy.save()
+        return Response({'status': 'awaiting_payment'})
+
+    @action(detail=True, methods=['post'])
+    def activate(self, request, pk=None):
+        policy = self.get_object()
+        policy.status = 'ACTIVE'
+        policy.save()
+        return Response({'status': 'activated'})
 
     @action(detail=True, methods=['post'])
     def renew(self, request, pk=None):
