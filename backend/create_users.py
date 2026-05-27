@@ -19,3 +19,20 @@ if not User.objects.filter(username='entry').exists():
     print('Data Entry created: entry / entry123')
 else:
     print('Data Entry already exists')
+
+# Create Auditor
+if not User.objects.filter(username='auditor').exists():
+    u = User.objects.create_user('auditor', 'auditor@company.com', 'auditor123')
+    UserProfile.objects.create(user=u, role='AUDITOR')
+    print('Auditor created: auditor / auditor123')
+else:
+    print('Auditor already exists')
+
+# Create Accountant
+if not User.objects.filter(username='accountant').exists():
+    u = User.objects.create_user('accountant', 'accountant@company.com', 'accountant123')
+    UserProfile.objects.create(user=u, role='ACCOUNTANT')
+    print('Accountant created: accountant / accountant123')
+else:
+    print('Accountant already exists')
+
