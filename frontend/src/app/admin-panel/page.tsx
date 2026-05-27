@@ -228,7 +228,17 @@ export default function AdminPanel() {
 
 
 
-  const pending = policies.filter(p => p.status === 'PENDING');
+  const pending = policies.filter(p => {
+    if (!user) return p.status === 'PENDING';
+    if (user.role === 'AUDITOR') {
+      return p.status === 'PENDING' || p.status === 'UNDER_REVIEW';
+    } else if (user.role === 'ACCOUNTANT') {
+      return p.status === 'APPROVED' || p.status === 'AWAITING_PAYMENT';
+    } else {
+      // ADMIN or default
+      return p.status === 'PENDING' || p.status === 'UNDER_REVIEW' || p.status === 'APPROVED' || p.status === 'AWAITING_PAYMENT';
+    }
+  });
   const active = policies.filter(p => p.status === 'ACTIVE');
   const totalPrem = active.reduce((s, p) => s + parseFloat(p.premium_amount || '0'), 0);
   const totalCov = active.reduce((s, p) => s + parseFloat(p.coverage_amount || '0'), 0);
