@@ -32,6 +32,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       
       if (parsedUser.lastActive && (now - parsedUser.lastActive > INACTIVITY_TIMEOUT)) {
         localStorage.removeItem('user');
+        sessionStorage.removeItem('token');
         setUserObj(null);
         setIsAuthenticated(false);
         if (pathname !== '/login') {
@@ -67,6 +68,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         const now = Date.now();
         if (parsedUser.lastActive && (now - parsedUser.lastActive > INACTIVITY_TIMEOUT)) {
           localStorage.removeItem('user');
+          sessionStorage.removeItem('token');
           setUserObj(null);
           setIsAuthenticated(false);
           router.push('/login');
@@ -74,6 +76,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       } else {
         setIsAuthenticated(false);
         setUserObj(null);
+        sessionStorage.removeItem('token');
         router.push('/login');
       }
     };
@@ -104,6 +107,33 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       events.forEach(event => window.removeEventListener(event, updateActivity));
     };
   }, [isAuthenticated, router]);
+
+  // Intercept global fetch to automatically add JWT authorization token
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    window.fetch = async function (input, init) {
+      const token = sessionStorage.getItem('token');
+      if (token && typeof input === 'string' && input.includes('/api/crm')) {
+        init = init || {};
+        init.headers = init.headers || {};
+        if (init.headers instanceof Headers) {
+          init.headers.set('Authorization', `Bearer ${token}`);
+        } else if (Array.isArray(init.headers)) {
+          init.headers.push(['Authorization', `Bearer ${token}`]);
+        } else {
+          init.headers = {
+            ...init.headers,
+            'Authorization': `Bearer ${token}`
+          };
+        }
+      }
+      return originalFetch.call(this, input, init);
+    };
+
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
 
 
   if (!mounted) return null; // Avoid hydration mismatch
@@ -216,6 +246,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 <div 
                   onClick={() => {
                     localStorage.removeItem('user');
+                    sessionStorage.removeItem('token');
                     router.push('/login');
                   }} 
                   style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', color: 'var(--text-main)', transition: 'background 0.2s' }}

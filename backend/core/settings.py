@@ -130,3 +130,14 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Custom User Model (If needed in future, currently using default)
 # AUTH_USER_MODEL = 'crm.User'
 
+# REST Framework Security Config
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'crm.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+

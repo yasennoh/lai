@@ -20,6 +20,9 @@ export default function Login() {
       const data = await res.json();
       if (data.success) {
         localStorage.setItem('user', JSON.stringify({ ...data.user, lastActive: Date.now() }));
+        if (data.token) {
+          sessionStorage.setItem('token', data.token);
+        }
         router.push(data.user.role === 'ADMIN' ? '/admin-panel' : '/data-entry');
       } else { setError(data.error || 'خطأ في البيانات'); }
     } catch { setError('خطأ في الاتصال بالسيرفر'); }

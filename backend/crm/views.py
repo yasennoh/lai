@@ -1,13 +1,16 @@
 from rest_framework import viewsets, status
-from rest_framework.decorators import api_view, action
+from rest_framework.decorators import api_view, action, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from datetime import datetime, timedelta
 from django.db.models import Sum, Count
 from django.utils import timezone
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.conf import settings
 from .models import Client, Policy, Claim, Communication, UserProfile, Payroll, Expense, PolicyTemplateText, SystemSettings, Department, Employee, Broker, PromotionalOffer
 from .serializers import ClientSerializer, PolicySerializer, ClaimSerializer, CommunicationSerializer, PayrollSerializer, ExpenseSerializer, PolicyTemplateTextSerializer, SystemSettingsSerializer, DepartmentSerializer, EmployeeSerializer, BrokerSerializer, PromotionalOfferSerializer
+from .jwt_helper import generate_jwt
 
 @api_view(['GET', 'POST'])
 def system_settings_view(request):
@@ -193,6 +196,7 @@ def dashboard_stats_view(request):
     })
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
@@ -204,8 +208,17 @@ def login_view(request):
         except UserProfile.DoesNotExist:
             profile = UserProfile.objects.create(user=user, role='ADMIN' if user.is_superuser else 'DATA_ENTRY')
             role = profile.role
+        
+        # Generate JWT token
+        token = generate_jwt({
+            'user_id': user.id,
+            'username': user.username,
+            'role': role
+        }, settings.SECRET_KEY)
+        
         return Response({
             'success': True,
+            'token': token,
             'user': {'id': user.id, 'username': user.username, 'role': role, 'first_name': user.first_name, 'last_name': user.last_name}
         })
     return Response({'success': False, 'error': 'بيانات الدخول غير صحيحة'}, status=status.HTTP_401_UNAUTHORIZED)
