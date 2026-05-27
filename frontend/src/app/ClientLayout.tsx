@@ -21,7 +21,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   useEffect(() => {
     setMounted(true);
     const user = localStorage.getItem('user');
-    if (!user) {
+    const token = sessionStorage.getItem('token');
+    if (!user || !token) {
       if (pathname !== '/login') {
         router.push('/login');
       }
@@ -63,7 +64,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
     const checkInactivity = () => {
       const user = localStorage.getItem('user');
-      if (user) {
+      const token = sessionStorage.getItem('token');
+      if (user && token) {
         const parsedUser = JSON.parse(user);
         const now = Date.now();
         if (parsedUser.lastActive && (now - parsedUser.lastActive > INACTIVITY_TIMEOUT)) {
