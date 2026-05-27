@@ -21,10 +21,29 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   useEffect(() => {
     setMounted(true);
     const user = localStorage.getItem('user');
-    if (!user && pathname !== '/login') {
-      router.push('/login');
-    } else if (user) {
+    if (!user) {
+      if (pathname !== '/login') {
+        router.push('/login');
+      }
+    } else {
       const parsedUser = JSON.parse(user);
+      const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 hours
+      const now = Date.now();
+      
+      if (parsedUser.lastActive && (now - parsedUser.lastActive > INACTIVITY_TIMEOUT)) {
+        localStorage.removeItem('user');
+        setUserObj(null);
+        setIsAuthenticated(false);
+        if (pathname !== '/login') {
+          router.push('/login');
+        }
+        return;
+      }
+      
+      // Initialize or update lastActive on page change
+      parsedUser.lastActive = now;
+      localStorage.setItem('user', JSON.stringify(parsedUser));
+
       setUserObj(parsedUser);
       if (parsedUser.role === 'DATA_ENTRY' && pathname === '/') {
         router.push('/data-entry');
@@ -33,6 +52,59 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       }
     }
   }, [pathname, router]);
+
+  // Periodic background check and interaction tracking for inactivity
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 hours
+    let lastWriteTime = Date.now();
+
+    const checkInactivity = () => {
+      const user = localStorage.getItem('user');
+      if (user) {
+        const parsedUser = JSON.parse(user);
+        const now = Date.now();
+        if (parsedUser.lastActive && (now - parsedUser.lastActive > INACTIVITY_TIMEOUT)) {
+          localStorage.removeItem('user');
+          setUserObj(null);
+          setIsAuthenticated(false);
+          router.push('/login');
+        }
+      } else {
+        setIsAuthenticated(false);
+        setUserObj(null);
+        router.push('/login');
+      }
+    };
+
+    // Check every 10 seconds
+    const interval = setInterval(checkInactivity, 10000);
+
+    const updateActivity = () => {
+      const now = Date.now();
+      // Throttle writing to localStorage to once every 10 seconds
+      if (now - lastWriteTime > 10000) {
+        lastWriteTime = now;
+        const user = localStorage.getItem('user');
+        if (user) {
+          const parsedUser = JSON.parse(user);
+          parsedUser.lastActive = now;
+          localStorage.setItem('user', JSON.stringify(parsedUser));
+        }
+      }
+    };
+
+    // Track user interactions
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    events.forEach(event => window.addEventListener(event, updateActivity));
+
+    return () => {
+      clearInterval(interval);
+      events.forEach(event => window.removeEventListener(event, updateActivity));
+    };
+  }, [isAuthenticated, router]);
+
 
   if (!mounted) return null; // Avoid hydration mismatch
 
