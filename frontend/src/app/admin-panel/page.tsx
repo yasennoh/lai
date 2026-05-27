@@ -78,6 +78,33 @@ export default function AdminPanel() {
   const { t, isRtl, locale } = useLanguage();
   const typeL: Record<string, string> = { AUTO: t('typeAuto'), HEALTH: t('typeHealth'), LIFE: t('typeLife'), PROPERTY: t('typeProperty'), TRAVEL: t('typeTravel'), MARINE: t('typeMarine'), FIRE: t('typeFire'), LIABILITY: t('typeLiability'), ENGINEERING: t('typeEngineering') };
   const statusL: Record<string, string> = { ACTIVE: t('statusActive'), EXPIRED: t('statusExpired'), CANCELLED: t('statusCancelled'), PENDING: t('statusPending'), SUSPENDED: t('statusSuspended') };
+  const claimStatusLabels: Record<string, string> = locale === 'ar' ? {
+    PENDING: 'تم التقديم',
+    UNDER_REVIEW: 'قيد التدقيق',
+    APPROVED: 'معتمدة فنيّاً',
+    REJECTED: 'مرفوضة فنيّاً',
+    AWAITING_PAYMENT: 'بانتظار الصرف',
+    PAID: 'تم الصرف',
+  } : {
+    PENDING: 'Submitted / Pending',
+    UNDER_REVIEW: 'Under Review',
+    APPROVED: 'Approved (Technical)',
+    REJECTED: 'Rejected (Technical)',
+    AWAITING_PAYMENT: 'Awaiting Payment',
+    PAID: 'Paid / Resolved',
+  };
+
+  const claimStatusColor = (s: string) => {
+    switch (s) {
+      case 'PENDING': return '#F59E0B';
+      case 'UNDER_REVIEW': return '#3B82F6';
+      case 'APPROVED': return '#8B5CF6';
+      case 'REJECTED': return '#EF4444';
+      case 'AWAITING_PAYMENT': return '#EC4899';
+      case 'PAID': return '#10B981';
+      default: return '#64748B';
+    }
+  };
   const freqL: Record<string, string> = { MONTHLY: t('freqMonthly'), QUARTERLY: t('freqQuarterly'), SEMI_ANNUAL: t('freqSemiAnnual'), ANNUAL: t('freqAnnual'), ONE_TIME: t('freqOneTime') };
   const payL: Record<string, string> = { CASH: t('payCash'), BANK_TRANSFER: t('payBank'), CREDIT_CARD: t('payCredit'), CHECK: t('payCheck') };
   const { formatAmount } = useCurrency();
@@ -190,8 +217,23 @@ export default function AdminPanel() {
     }
   };
 
+  const handleReviewClaim = async (id: number) => {
+    await fetch(`${API}/claims/${id}/review/`, { method: 'POST' });
+    fetchAll();
+  };
+
   const handleApproveClaim = async (id: number) => {
     await fetch(`${API}/claims/${id}/approve/`, { method: 'POST' });
+    fetchAll();
+  };
+
+  const handleAwaitPaymentClaim = async (id: number) => {
+    await fetch(`${API}/claims/${id}/await_payment/`, { method: 'POST' });
+    fetchAll();
+  };
+
+  const handlePayClaim = async (id: number) => {
+    await fetch(`${API}/claims/${id}/pay/`, { method: 'POST' });
     fetchAll();
   };
 
@@ -237,6 +279,17 @@ export default function AdminPanel() {
     } else {
       // ADMIN or default
       return p.status === 'PENDING' || p.status === 'UNDER_REVIEW' || p.status === 'APPROVED' || p.status === 'AWAITING_PAYMENT';
+    }
+  });
+  const pendingClaims = claims.filter(c => {
+    if (!user) return c.status === 'PENDING';
+    if (user.role === 'AUDITOR') {
+      return c.status === 'PENDING' || c.status === 'UNDER_REVIEW';
+    } else if (user.role === 'ACCOUNTANT') {
+      return c.status === 'APPROVED' || c.status === 'AWAITING_PAYMENT';
+    } else {
+      // ADMIN or default
+      return c.status === 'PENDING' || c.status === 'UNDER_REVIEW' || c.status === 'APPROVED' || c.status === 'AWAITING_PAYMENT';
     }
   });
   const active = policies.filter(p => p.status === 'ACTIVE');
@@ -319,7 +372,24 @@ export default function AdminPanel() {
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
         {[
-          { k: 'pending', l: user.role === 'ADMIN' ? t('pendingPoliciesTab') : user.role === 'AUDITOR' ? (locale === 'ar' ? 'قيد المراجعة والتدقيق' : 'Awaiting Audit') : (locale === 'ar' ? 'التحصيل والتفعيل' : 'Awaiting Payment'), n: pending.length },
+          { 
+            k: 'pending', 
+            l: user.role === 'ADMIN' 
+              ? (locale === 'ar' ? 'بوالص تحتاج إجراء' : 'Policies Needing Action') 
+              : user.role === 'AUDITOR' 
+                ? (locale === 'ar' ? 'بوالص قيد المراجعة والتدقيق' : 'Policies Awaiting Audit') 
+                : (locale === 'ar' ? 'تحصيل البوالص' : 'Policies Awaiting Payment'), 
+            n: pending.length 
+          },
+          { 
+            k: 'pending_claims', 
+            l: user.role === 'ADMIN' 
+              ? (locale === 'ar' ? 'مطالبات تحتاج إجراء' : 'Claims Needing Action') 
+              : user.role === 'AUDITOR' 
+                ? (locale === 'ar' ? 'مطالبات قيد المراجعة والتدقيق' : 'Claims Awaiting Audit') 
+                : (locale === 'ar' ? 'صرف المطالبات' : 'Claims Awaiting Payment'), 
+            n: pendingClaims.length 
+          },
           ...(user.role === 'ADMIN' ? [
             { k: 'all', l: t('allPoliciesTab'), n: policies.length },
             { k: 'claims', l: t('claims'), n: claims.length }
@@ -365,6 +435,57 @@ export default function AdminPanel() {
                     
                     {p.status === 'AWAITING_PAYMENT' && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
                       <button onClick={() => handleActivate(p.id)} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#10B981', color: 'white' }}>{locale === 'ar' ? 'تأكيد الدفع والتفعيل' : 'Confirm & Activate'}</button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>}
+        </div>
+      )}
+
+      {tab === 'pending_claims' && (
+        <div className="glass-panel" style={{ padding: '1.5rem' }}>
+          <h2 style={{ marginBottom: '1rem' }}>
+            {user.role === 'AUDITOR' 
+              ? (locale === 'ar' ? 'مطالبات بانتظار التدقيق والمراجعة' : 'Claims Awaiting Technical Audit') 
+              : user.role === 'ACCOUNTANT' 
+                ? (locale === 'ar' ? 'مطالبات بانتظار الصرف والدفع' : 'Claims Awaiting Disbursement') 
+                : (locale === 'ar' ? 'مطالبات بانتظار اتخاذ إجراء' : 'Claims Awaiting Action')}
+          </h2>
+          {pendingClaims.length === 0 ? <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>{locale === 'ar' ? 'لا توجد مطالبات معلقة حالياً' : 'No pending claims'}</p> :
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {pendingClaims.map(c => (
+                <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem', borderRadius: '12px', background: 'rgba(236,72,153,0.03)', border: '1px solid rgba(236,72,153,0.15)', transition: 'all 0.2s' }}>
+                  <div>
+                    <div style={{ fontWeight: 'bold', fontSize: '1.05rem' }}>
+                      {c.claim_number}
+                      <span style={{ marginRight: '0.75rem', marginLeft: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '999px', fontSize: '0.75rem', color: 'white', background: claimStatusColor(c.status) }}>
+                        {claimStatusLabels[c.status]}
+                      </span>
+                    </div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.3rem' }}>
+                      {locale === 'ar' ? 'قيمة المطالبة:' : 'Claim Amount:'} {formatAmount(c.claim_amount)} • {locale === 'ar' ? 'الوصف:' : 'Description:'} {c.description}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    
+                    {c.status === 'PENDING' && (user.role === 'ADMIN' || user.role === 'AUDITOR') && (
+                      <button onClick={() => handleReviewClaim(c.id)} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#3B82F6', color: 'white' }}>{locale === 'ar' ? 'بدء المراجعة' : 'Start Review'}</button>
+                    )}
+                    
+                    {c.status === 'UNDER_REVIEW' && (user.role === 'ADMIN' || user.role === 'AUDITOR') && (
+                      <>
+                        <button onClick={() => handleApproveClaim(c.id)} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#10B981', color: 'white' }}>{locale === 'ar' ? 'موافقة فنية' : 'Approve'}</button>
+                        <button onClick={() => handleRejectClaim(c.id)} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#EF4444', color: 'white' }}>{locale === 'ar' ? 'رفض فني' : 'Reject'}</button>
+                      </>
+                    )}
+                    
+                    {c.status === 'APPROVED' && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
+                      <button onClick={() => handleAwaitPaymentClaim(c.id)} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#EC4899', color: 'white' }}>{locale === 'ar' ? 'طلب الصرف' : 'Request Payment'}</button>
+                    )}
+                    
+                    {c.status === 'AWAITING_PAYMENT' && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
+                      <button onClick={() => handlePayClaim(c.id)} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#10B981', color: 'white' }}>{locale === 'ar' ? 'تأكيد الصرف' : 'Confirm & Paid'}</button>
                     )}
                   </div>
                 </div>
@@ -468,8 +589,8 @@ export default function AdminPanel() {
                     <td style={{ padding: '1.2rem 1rem', fontWeight: 'bold', fontSize: '0.95rem', borderBottom: idx === claims.length - 1 ? 'none' : '1px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{c.claim_number}</td>
                     <td style={{ padding: '1.2rem 1rem', fontSize: '0.95rem', borderBottom: idx === claims.length - 1 ? 'none' : '1px solid #E2E8F0', borderLeft: '1px solid #E2E8F0', color: 'var(--primary)', fontWeight: 'bold' }}>{formatAmount(c.claim_amount)}</td>
                     <td style={{ padding: '1.2rem 1rem', fontSize: '0.95rem', borderBottom: idx === claims.length - 1 ? 'none' : '1px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>
-                      <span style={{ padding: '0.25rem 0.75rem', borderRadius: '999px', fontSize: '0.8rem', color: 'white', background: c.status === 'APPROVED' ? '#10B981' : c.status === 'REJECTED' ? '#EF4444' : '#F59E0B', fontWeight: 'bold', display: 'inline-block' }}>
-                        {c.status === 'APPROVED' ? t('claimStatusApproved') : c.status === 'REJECTED' ? t('claimStatusRejected') : t('claimStatusReview')}
+                      <span style={{ padding: '0.25rem 0.75rem', borderRadius: '999px', fontSize: '0.8rem', color: 'white', background: claimStatusColor(c.status), fontWeight: 'bold', display: 'inline-block' }}>
+                        {claimStatusLabels[c.status]}
                       </span>
                     </td>
                     <td style={{ padding: '1.2rem 1rem', fontSize: '0.95rem', borderBottom: idx === claims.length - 1 ? 'none' : '1px solid #E2E8F0' }}>
@@ -498,56 +619,20 @@ export default function AdminPanel() {
                           {locale === 'ar' ? 'معلومات المطالب' : 'Claim Details'}
                         </button>
 
-                        {c.status !== 'APPROVED' && c.status !== 'REJECTED' && (
+                        {c.status === 'PENDING' && (user.role === 'ADMIN' || user.role === 'AUDITOR') && (
+                          <button onClick={() => handleReviewClaim(c.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid #3B82F6', background: 'rgba(59, 130, 246, 0.05)', color: '#3B82F6', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600', fontSize: '0.8rem' }}>{locale === 'ar' ? 'بدء التدقيق' : 'Start Review'}</button>
+                        )}
+                        {c.status === 'UNDER_REVIEW' && (user.role === 'ADMIN' || user.role === 'AUDITOR') && (
                           <>
-                            <button 
-                              onClick={() => handleApproveClaim(c.id)}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.25rem',
-                                padding: '0.4rem 0.8rem',
-                                borderRadius: '6px',
-                                border: '1px solid #10B981',
-                                background: 'rgba(16, 185, 129, 0.05)',
-                                color: '#10B981',
-                                cursor: 'pointer',
-                                fontFamily: 'inherit',
-                                fontWeight: '600',
-                                fontSize: '0.8rem',
-                                transition: 'all 0.2s'
-                              }}
-                              onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(16, 185, 129, 0.15)'; }}
-                              onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)'; }}
-                            >
-                              <CheckCircleOutlineOutlinedIcon style={{ fontSize: '1rem' }} />
-                              {t('approve')}
-                            </button>
-
-                            <button 
-                              onClick={() => handleRejectClaim(c.id)}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.25rem',
-                                padding: '0.4rem 0.8rem',
-                                borderRadius: '6px',
-                                border: '1px solid #EF4444',
-                                background: 'rgba(239, 68, 68, 0.05)',
-                                color: '#EF4444',
-                                cursor: 'pointer',
-                                fontFamily: 'inherit',
-                                fontWeight: '600',
-                                fontSize: '0.8rem',
-                                transition: 'all 0.2s'
-                              }}
-                              onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; }}
-                              onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.05)'; }}
-                            >
-                              <CancelOutlinedIcon style={{ fontSize: '1rem' }} />
-                              {t('reject')}
-                            </button>
+                            <button onClick={() => handleApproveClaim(c.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid #10B981', background: 'rgba(16, 185, 129, 0.05)', color: '#10B981', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600', fontSize: '0.8rem' }}>{locale === 'ar' ? 'موافقة فنية' : 'Approve'}</button>
+                            <button onClick={() => handleRejectClaim(c.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid #EF4444', background: 'rgba(239, 68, 68, 0.05)', color: '#EF4444', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600', fontSize: '0.8rem' }}>{locale === 'ar' ? 'رفض فني' : 'Reject'}</button>
                           </>
+                        )}
+                        {c.status === 'APPROVED' && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
+                          <button onClick={() => handleAwaitPaymentClaim(c.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid #EC4899', background: 'rgba(236, 72, 153, 0.05)', color: '#EC4899', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600', fontSize: '0.8rem' }}>{locale === 'ar' ? 'طلب الصرف' : 'Request Payment'}</button>
+                        )}
+                        {c.status === 'AWAITING_PAYMENT' && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
+                          <button onClick={() => handlePayClaim(c.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid #10B981', background: 'rgba(16, 185, 129, 0.05)', color: '#10B981', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600', fontSize: '0.8rem' }}>{locale === 'ar' ? 'تأكيد الصرف' : 'Confirm Paid'}</button>
                         )}
                       </div>
                     </td>
@@ -987,7 +1072,7 @@ export default function AdminPanel() {
                     { l: 'رقم المطالبة', v: selectedClaim.claim_number },
                     { l: 'مبلغ المطالبة', v: formatAmount(selectedClaim.claim_amount) },
                     { l: 'تاريخ التقديم', v: selectedClaim.filed_date || '—' },
-                    { l: 'حالة المطالبة', v: selectedClaim.status === 'APPROVED' ? 'مقبولة' : selectedClaim.status === 'REJECTED' ? 'مرفوضة' : 'قيد المراجعة', c: selectedClaim.status === 'APPROVED' ? '#10B981' : selectedClaim.status === 'REJECTED' ? '#EF4444' : '#F59E0B' },
+                    { l: 'حالة المطالبة', v: claimStatusLabels[selectedClaim.status] || selectedClaim.status, c: claimStatusColor(selectedClaim.status) },
                   ].map((f, i) => (
                     <div key={i} style={{ background: 'rgba(0,0,0,0.04)', padding: '0.75rem 1rem', borderRadius: '8px' }}>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>{f.l}</div>
@@ -1011,31 +1096,69 @@ export default function AdminPanel() {
                 )}
 
                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: '2rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1.5rem', flexWrap: 'wrap' }}>
-                  {selectedClaim.status !== 'APPROVED' && selectedClaim.status !== 'REJECTED' && (
+                  {selectedClaim.status === 'PENDING' && (user.role === 'ADMIN' || user.role === 'AUDITOR') && (
+                    <button 
+                      onClick={async () => { 
+                        await handleReviewClaim(selectedClaim.id); 
+                        setIsClaimModalOpen(false); 
+                        setSelectedClaim(null); 
+                        alert(locale === 'ar' ? 'تم بدء دراسة المطالبة' : 'Claim review started'); 
+                      }} 
+                      style={{ flex: 1, minWidth: '120px', padding: '0.75rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#3B82F6', color: 'white' }}
+                    >
+                      {locale === 'ar' ? 'بدء المراجعة' : 'Start Review'}
+                    </button>
+                  )}
+                  {selectedClaim.status === 'UNDER_REVIEW' && (user.role === 'ADMIN' || user.role === 'AUDITOR') && (
                     <>
                       <button 
                         onClick={async () => { 
                           await handleApproveClaim(selectedClaim.id); 
                           setIsClaimModalOpen(false); 
                           setSelectedClaim(null); 
-                          alert('تمت الموافقة على المطالبة بنجاح'); 
+                          alert(locale === 'ar' ? 'تمت الموافقة الفنية على المطالبة' : 'Claim approved'); 
                         }} 
                         style={{ flex: 1, minWidth: '120px', padding: '0.75rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#10B981', color: 'white' }}
                       >
-                        موافقة واعتماد
+                        {locale === 'ar' ? 'موافقة فنية' : 'Approve'}
                       </button>
                       <button 
                         onClick={async () => { 
                           await handleRejectClaim(selectedClaim.id); 
                           setIsClaimModalOpen(false); 
                           setSelectedClaim(null); 
-                          alert('تم رفض المطالبة'); 
                         }} 
                         style={{ flex: 1, minWidth: '120px', padding: '0.75rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#EF4444', color: 'white' }}
                       >
-                        رفض المطالبة
+                        {locale === 'ar' ? 'رفض المطالبة' : 'Reject'}
                       </button>
                     </>
+                  )}
+                  {selectedClaim.status === 'APPROVED' && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
+                    <button 
+                      onClick={async () => { 
+                        await handleAwaitPaymentClaim(selectedClaim.id); 
+                        setIsClaimModalOpen(false); 
+                        setSelectedClaim(null); 
+                        alert(locale === 'ar' ? 'تم تحويل المطالبة للصرف المالي' : 'Disbursement requested'); 
+                      }} 
+                      style={{ flex: 1, minWidth: '120px', padding: '0.75rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#EC4899', color: 'white' }}
+                    >
+                      {locale === 'ar' ? 'طلب الصرف' : 'Request Payment'}
+                    </button>
+                  )}
+                  {selectedClaim.status === 'AWAITING_PAYMENT' && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
+                    <button 
+                      onClick={async () => { 
+                        await handlePayClaim(selectedClaim.id); 
+                        setIsClaimModalOpen(false); 
+                        setSelectedClaim(null); 
+                        alert(locale === 'ar' ? 'تم تأكيد الصرف بنجاح' : 'Payment confirmed'); 
+                      }} 
+                      style={{ flex: 1, minWidth: '120px', padding: '0.75rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', background: '#10B981', color: 'white' }}
+                    >
+                      {locale === 'ar' ? 'تأكيد الصرف' : 'Confirm Disbursement'}
+                    </button>
                   )}
                   <button onClick={() => { setIsClaimModalOpen(false); setSelectedClaim(null); }} style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: '1px solid var(--text-muted)', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', color: 'var(--text-main)', flex: selectedClaim.status === 'APPROVED' || selectedClaim.status === 'REJECTED' ? 1 : 'none' }}>
                     إغلاق

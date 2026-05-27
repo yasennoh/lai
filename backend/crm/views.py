@@ -115,6 +115,13 @@ class ClaimViewSet(viewsets.ModelViewSet):
     serializer_class = ClaimSerializer
 
     @action(detail=True, methods=['post'])
+    def review(self, request, pk=None):
+        claim = self.get_object()
+        claim.status = 'UNDER_REVIEW'
+        claim.save()
+        return Response({'status': 'under_review'})
+
+    @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
         claim = self.get_object()
         claim.status = 'APPROVED'
@@ -128,6 +135,20 @@ class ClaimViewSet(viewsets.ModelViewSet):
         claim.rejection_reason = request.data.get('rejection_reason', '')
         claim.save()
         return Response({'status': 'rejected', 'rejection_reason': claim.rejection_reason})
+
+    @action(detail=True, methods=['post'])
+    def await_payment(self, request, pk=None):
+        claim = self.get_object()
+        claim.status = 'AWAITING_PAYMENT'
+        claim.save()
+        return Response({'status': 'awaiting_payment'})
+
+    @action(detail=True, methods=['post'])
+    def pay(self, request, pk=None):
+        claim = self.get_object()
+        claim.status = 'PAID'
+        claim.save()
+        return Response({'status': 'paid'})
 
 
 class CommunicationViewSet(viewsets.ModelViewSet):

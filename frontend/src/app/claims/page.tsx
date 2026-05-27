@@ -183,11 +183,12 @@ export default function Claims() {
       renderCell: (params) => {
         let bg = '#1E293B';
         let label = params.value;
-        if (label === 'PENDING' || label === 'Submitted') { bg = '#F59E0B'; label = locale === 'ar' ? 'قيد المراجعة' : 'Pending Review'; }
-        if (label === 'UNDER_REVIEW') { bg = '#0EA5E9'; label = locale === 'ar' ? 'تحت الإجراء' : 'In Progress'; }
-        if (label === 'APPROVED') { bg = '#10B981'; label = locale === 'ar' ? 'مقبولة' : 'Approved'; }
-        if (label === 'REJECTED') { bg = '#EF4444'; label = locale === 'ar' ? 'مرفوضة' : 'Rejected'; }
-        if (label === 'CLOSED') { bg = '#EF4444'; label = locale === 'ar' ? 'مغلقة' : 'Closed'; }
+        if (label === 'PENDING' || label === 'Submitted') { bg = '#F59E0B'; label = locale === 'ar' ? 'تم التقديم' : 'Submitted'; }
+        if (label === 'UNDER_REVIEW') { bg = '#3B82F6'; label = locale === 'ar' ? 'قيد التدقيق' : 'Under Review'; }
+        if (label === 'APPROVED') { bg = '#8B5CF6'; label = locale === 'ar' ? 'معتمدة فنيّاً' : 'Approved (Technical)'; }
+        if (label === 'REJECTED') { bg = '#EF4444'; label = locale === 'ar' ? 'مرفوضة فنيّاً' : 'Rejected'; }
+        if (label === 'AWAITING_PAYMENT') { bg = '#EC4899'; label = locale === 'ar' ? 'بانتظار الصرف' : 'Awaiting Payment'; }
+        if (label === 'PAID') { bg = '#10B981'; label = locale === 'ar' ? 'تم الصرف' : 'Paid / Resolved'; }
         return (
           <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
             <span style={{ backgroundColor: bg, color: 'white', padding: '0.3rem 0.8rem', borderRadius: '999px', fontSize: '0.85rem', display: 'inline-block', lineHeight: 1.5 }}>
@@ -487,11 +488,12 @@ export default function Claims() {
                 <div style={{background:'rgba(0,0,0,0.03)',padding:'0.75rem 1rem',borderRadius:'8px'}}>
                   <div style={{fontSize:'0.8rem',color:'var(--text-muted)',marginBottom:'0.2rem'}}>{locale === 'ar' ? 'حالة المطالبة' : 'Claim Status'}</div>
                   <div style={{fontWeight:'bold'}}>{
-                    selectedClaim.status === 'PENDING' || selectedClaim.status === 'Submitted' ? locale === 'ar' ? 'قيد المراجعة' : 'Pending Review' :
-                    selectedClaim.status === 'UNDER_REVIEW' ? locale === 'ar' ? 'تحت الإجراء' : 'In Progress' :
-                    selectedClaim.status === 'APPROVED' ? locale === 'ar' ? 'مقبولة' : 'Approved' :
-                    selectedClaim.status === 'REJECTED' ? locale === 'ar' ? 'مرفوضة' : 'Rejected' :
-                    selectedClaim.status === 'CLOSED' ? locale === 'ar' ? 'مغلقة' : 'Closed' : selectedClaim.status
+                    selectedClaim.status === 'PENDING' ? locale === 'ar' ? 'تم التقديم' : 'Submitted / Pending' :
+                    selectedClaim.status === 'UNDER_REVIEW' ? locale === 'ar' ? 'قيد التدقيق' : 'Under Review' :
+                    selectedClaim.status === 'APPROVED' ? locale === 'ar' ? 'معتمدة فنيّاً' : 'Approved (Technical)' :
+                    selectedClaim.status === 'REJECTED' ? locale === 'ar' ? 'مرفوضة فنيّاً' : 'Rejected (Technical)' :
+                    selectedClaim.status === 'AWAITING_PAYMENT' ? locale === 'ar' ? 'بانتظار الصرف' : 'Awaiting Payment' :
+                    selectedClaim.status === 'PAID' ? locale === 'ar' ? 'تم الصرف' : 'Paid' : selectedClaim.status
                   }</div>
                 </div>
                 <div style={{background:'rgba(0,0,0,0.03)',padding:'0.75rem 1rem',borderRadius:'8px',gridColumn:'1/-1'}}>
@@ -509,7 +511,58 @@ export default function Claims() {
                   </div>
                 )}
               </div>
-              <div style={{display:'flex',justifyContent:'flex-end'}}>
+              <div style={{display:'flex',justifyContent:'flex-end',gap:'0.5rem',flexWrap:'wrap',width:'100%',marginTop:'1rem'}}>
+                {selectedClaim.status === 'PENDING' && (user?.role === 'ADMIN' || user?.role === 'AUDITOR') && (
+                  <button onClick={async () => {
+                    await fetch(`https://ynoah.pythonanywhere.com/api/crm/claims/${selectedClaim.id}/review/`, { method: 'POST' });
+                    fetchData();
+                    setIsViewOpen(false);
+                    setSelectedClaim(null);
+                    alert(locale === 'ar' ? 'تم بدء دراسة المطالبة' : 'Review started');
+                  }} style={btnStyle}>{locale === 'ar' ? 'بدء المراجعة' : 'Start Review'}</button>
+                )}
+                {selectedClaim.status === 'UNDER_REVIEW' && (user?.role === 'ADMIN' || user?.role === 'AUDITOR') && (
+                  <>
+                    <button onClick={async () => {
+                      await fetch(`https://ynoah.pythonanywhere.com/api/crm/claims/${selectedClaim.id}/approve/`, { method: 'POST' });
+                      fetchData();
+                      setIsViewOpen(false);
+                      setSelectedClaim(null);
+                      alert(locale === 'ar' ? 'تمت الموافقة الفنية' : 'Approved');
+                    }} style={btnStyle}>{locale === 'ar' ? 'موافقة فنية' : 'Approve'}</button>
+                    <button onClick={async () => {
+                      const reason = prompt(locale === 'ar' ? 'الرجاء إدخال سبب الرفض:' : 'Enter rejection reason:');
+                      if (reason === null) return;
+                      await fetch(`https://ynoah.pythonanywhere.com/api/crm/claims/${selectedClaim.id}/reject/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ rejection_reason: reason })
+                      });
+                      fetchData();
+                      setIsViewOpen(false);
+                      setSelectedClaim(null);
+                      alert(locale === 'ar' ? 'تم رفض المطالبة فنيّاً' : 'Claim rejected');
+                    }} style={{...btnStyle,backgroundColor:'#EF4444'}}>{locale === 'ar' ? 'رفض فني' : 'Reject'}</button>
+                  </>
+                )}
+                {selectedClaim.status === 'APPROVED' && (user?.role === 'ADMIN' || user?.role === 'ACCOUNTANT') && (
+                  <button onClick={async () => {
+                    await fetch(`https://ynoah.pythonanywhere.com/api/crm/claims/${selectedClaim.id}/await_payment/`, { method: 'POST' });
+                    fetchData();
+                    setIsViewOpen(false);
+                    setSelectedClaim(null);
+                    alert(locale === 'ar' ? 'تم طلب الصرف المالي' : 'Disbursement requested');
+                  }} style={btnStyle}>{locale === 'ar' ? 'طلب الصرف' : 'Request Payment'}</button>
+                )}
+                {selectedClaim.status === 'AWAITING_PAYMENT' && (user?.role === 'ADMIN' || user?.role === 'ACCOUNTANT') && (
+                  <button onClick={async () => {
+                    await fetch(`https://ynoah.pythonanywhere.com/api/crm/claims/${selectedClaim.id}/pay/`, { method: 'POST' });
+                    fetchData();
+                    setIsViewOpen(false);
+                    setSelectedClaim(null);
+                    alert(locale === 'ar' ? 'تم تأكيد الصرف بنجاح' : 'Paid successfully');
+                  }} style={btnStyle}>{locale === 'ar' ? 'تأكيد الصرف' : 'Confirm Disbursement'}</button>
+                )}
                 <button onClick={() => { setIsViewOpen(false); setSelectedClaim(null); }} className="btn-primary" style={{padding:'0.5rem 1.5rem'}}>{locale === 'ar' ? 'إغلاق' : 'Close'}</button>
               </div>
             </div>
@@ -545,11 +598,12 @@ export default function Claims() {
                 <div>
                   <label style={{fontSize:'0.85rem',color:'var(--text-muted)',display:'block',marginBottom:'0.3rem'}}>{locale === 'ar' ? 'حالة المطالبة *' : 'Claim Status *'}</label>
                   <select value={editForm.status} onChange={e => setEditForm({...editForm, status: e.target.value})} required style={{width:'100%',padding:'0.75rem',borderRadius:'8px',border:'1px solid var(--glass-border)',background:'rgba(0,0,0,0.05)',color:'var(--text-main)',outline:'none'}}>
-                    <option value="PENDING" style={{background:'var(--surface)'}}>قيد المراجعة</option>
-                    <option value="UNDER_REVIEW" style={{background:'var(--surface)'}}>تحت الإجراء</option>
-                    <option value="APPROVED" style={{background:'var(--surface)'}}>مقبولة</option>
-                    <option value="REJECTED" style={{background:'var(--surface)'}}>مرفوضة</option>
-                    <option value="CLOSED" style={{background:'var(--surface)'}}>مغلقة</option>
+                    <option value="PENDING" style={{background:'var(--surface)'}}>تم التقديم</option>
+                    <option value="UNDER_REVIEW" style={{background:'var(--surface)'}}>قيد التدقيق</option>
+                    <option value="APPROVED" style={{background:'var(--surface)'}}>معتمدة فنيّاً</option>
+                    <option value="REJECTED" style={{background:'var(--surface)'}}>مرفوضة فنيّاً</option>
+                    <option value="AWAITING_PAYMENT" style={{background:'var(--surface)'}}>بانتظار الصرف</option>
+                    <option value="PAID" style={{background:'var(--surface)'}}>تم الصرف</option>
                   </select>
                 </div>
                 {editForm.status === 'REJECTED' && (
