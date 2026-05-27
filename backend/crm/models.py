@@ -7,6 +7,7 @@ class UserProfile(models.Model):
         ('DATA_ENTRY', 'مدخل بيانات'),
         ('AUDITOR', 'مدقق فني'),
         ('ACCOUNTANT', 'محاسب'),
+        ('HR', 'مسؤول الموارد البشرية'),
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='DATA_ENTRY')

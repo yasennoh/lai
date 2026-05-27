@@ -23,7 +23,11 @@ export default function Login() {
         if (data.token) {
           sessionStorage.setItem('token', data.token);
         }
-        router.push(data.user.role === 'ADMIN' ? '/admin-panel' : '/data-entry');
+        if (['ADMIN', 'AUDITOR', 'ACCOUNTANT', 'HR'].includes(data.user.role)) {
+          router.push('/admin-panel');
+        } else {
+          router.push('/data-entry');
+        }
       } else { setError(data.error || 'خطأ في البيانات'); }
     } catch { setError('خطأ في الاتصال بالسيرفر'); }
     setLoading(false);

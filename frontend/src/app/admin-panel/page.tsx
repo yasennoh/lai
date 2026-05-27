@@ -13,6 +13,8 @@ import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import ApartmentOutlinedIcon from '@mui/icons-material/ApartmentOutlined';
+import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
 const API = 'https://ynoah.pythonanywhere.com/api/crm';
 
 const sColor = (s: string) => s === 'ACTIVE' ? '#10B981' : s === 'PENDING' ? '#F59E0B' : s === 'EXPIRED' ? '#64748B' : '#EF4444';
@@ -129,22 +131,38 @@ export default function AdminPanel() {
   const [isPolicyDropdownOpen, setIsPolicyDropdownOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
   const [claimsSearch, setClaimsSearch] = useState('');
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [payrolls, setPayrolls] = useState<any[]>([]);
 
   useEffect(() => {
     const u = localStorage.getItem('user');
     if (!u) { router.push('/login'); return; }
     const parsed = JSON.parse(u);
-    if (!['ADMIN', 'AUDITOR', 'ACCOUNTANT'].includes(parsed.role)) { router.push('/login'); return; }
+    if (!['ADMIN', 'AUDITOR', 'ACCOUNTANT', 'HR'].includes(parsed.role)) { router.push('/login'); return; }
     setUser(parsed);
+    if (parsed.role === 'HR') {
+      setTab('hr_employees');
+    }
     fetchAll();
   }, []);
 
   const fetchAll = () => {
     Promise.all([
-      fetch(`${API}/policies/`).then(r => r.json()),
-      fetch(`${API}/clients/`).then(r => r.json()),
-      fetch(`${API}/claims/`).then(r => r.json()),
-    ]).then(([p, c, cl]) => { setPolicies(p); setClients(c); setClaims(cl); });
+      fetch(`${API}/policies/`).then(r => r.ok ? r.json() : []),
+      fetch(`${API}/clients/`).then(r => r.ok ? r.json() : []),
+      fetch(`${API}/claims/`).then(r => r.ok ? r.json() : []),
+      fetch(`${API}/employees/`).then(r => r.ok ? r.json() : []),
+      fetch(`${API}/departments/`).then(r => r.ok ? r.json() : []),
+      fetch(`${API}/payrolls/`).then(r => r.ok ? r.json() : []),
+    ]).then(([p, c, cl, emp, dep, pay]) => {
+      setPolicies(p);
+      setClients(c);
+      setClaims(cl);
+      setEmployees(emp);
+      setDepartments(dep);
+      setPayrolls(pay);
+    }).catch(e => console.error("Fetch all error:", e));
   };
 
   const clientName = (id: number) => { const c = clients.find(x => x.id === id); return c ? `${c.first_name} ${c.last_name}` : '—'; };
@@ -316,7 +334,13 @@ export default function AdminPanel() {
       {/* Breadcrumb Header */}
       <div className="card" style={{ marginBottom: '1.5rem', padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '8px' }}>
         <h1 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 'bold', color: 'var(--text-main)' }}>
-          {user.role === 'ADMIN' ? t('staffManagement') : user.role === 'AUDITOR' ? (locale === 'ar' ? 'لوحة التدقيق الفني للوثائق' : 'Technical Audit Panel') : (locale === 'ar' ? 'لوحة العمليات المالية والمحاسبة' : 'Financial Accounting Panel')}
+          {user.role === 'ADMIN' 
+            ? t('staffManagement') 
+            : user.role === 'AUDITOR' 
+              ? (locale === 'ar' ? 'لوحة التدقيق الفني للوثائق' : 'Technical Audit Panel') 
+              : user.role === 'ACCOUNTANT'
+                ? (locale === 'ar' ? 'لوحة العمليات المالية والمحاسبة' : 'Financial Accounting Panel')
+                : (locale === 'ar' ? 'لوحة الموارد البشرية' : 'HR Panel')}
         </h1>
         <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Dashboard / Admin Panel</span>
       </div>
@@ -341,6 +365,21 @@ export default function AdminPanel() {
               { l: locale === 'ar' ? 'الوثائق الفعالة' : 'Active Policies', v: active.length, c: '#10B981', icon: CheckCircleOutlineOutlinedIcon },
               { l: locale === 'ar' ? 'المبالغ المحصلة' : 'Collected Amount', v: formatAmount(totalPrem.toString()), c: '#10B981', icon: AccountBalanceWalletOutlinedIcon },
               { l: locale === 'ar' ? 'الديون المستحقة' : 'Outstanding Amount', v: formatAmount(totalAwaitingPayment.toString()), c: '#EF4444', icon: AccountBalanceWalletOutlinedIcon },
+            ];
+          } else if (user.role === 'HR') {
+            const currentMonthStr = new Date().toISOString().substring(0, 7);
+            const currentMonthSalaries = payrolls
+              .filter(py => py.month === currentMonthStr)
+              .reduce((sum, py) => sum + parseFloat(py.basic_salary || '0') + parseFloat(py.bonuses || '0') + parseFloat(py.overtime || '0') - parseFloat(py.social_security || '0') + parseFloat(py.end_of_service || '0'), 0);
+            const pendingPayrolls = payrolls.filter(py => py.status === 'PENDING').length;
+            const paidPayrolls = payrolls.filter(py => py.status === 'PAID').length;
+
+            kpis = [
+              { l: locale === 'ar' ? 'إجمالي الموظفين' : 'Total Employees', v: employees.length, c: '#3B82F6', icon: GroupsOutlinedIcon },
+              { l: locale === 'ar' ? 'الأقسام' : 'Departments', v: departments.length, c: '#8B5CF6', icon: ApartmentOutlinedIcon },
+              { l: locale === 'ar' ? 'رواتب الشهر الحالي' : 'Current Month Salaries', v: formatAmount(currentMonthSalaries.toString()), c: '#10B981', icon: AccountBalanceWalletOutlinedIcon },
+              { l: locale === 'ar' ? 'مسيرات رواتب معلقة' : 'Pending Payrolls', v: pendingPayrolls, c: '#F59E0B', icon: PendingActionsOutlinedIcon },
+              { l: locale === 'ar' ? 'مسيرات رواتب مصروفة' : 'Disbursed Payrolls', v: paidPayrolls, c: '#10B981', icon: CheckCircleOutlineOutlinedIcon },
             ];
           } else {
             kpis = [
@@ -372,30 +411,36 @@ export default function AdminPanel() {
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
         {[
-          { 
-            k: 'pending', 
-            l: user.role === 'ADMIN' 
-              ? (locale === 'ar' ? 'بوالص تحتاج إجراء' : 'Policies Needing Action') 
-              : user.role === 'AUDITOR' 
-                ? (locale === 'ar' ? 'بوالص قيد المراجعة والتدقيق' : 'Policies Awaiting Audit') 
-                : (locale === 'ar' ? 'تحصيل البوالص' : 'Policies Awaiting Payment'), 
-            n: pending.length 
-          },
-          { 
-            k: 'pending_claims', 
-            l: user.role === 'ADMIN' 
-              ? (locale === 'ar' ? 'مطالبات تحتاج إجراء' : 'Claims Needing Action') 
-              : user.role === 'AUDITOR' 
-                ? (locale === 'ar' ? 'مطالبات قيد المراجعة والتدقيق' : 'Claims Awaiting Audit') 
-                : (locale === 'ar' ? 'صرف المطالبات' : 'Claims Awaiting Payment'), 
-            n: pendingClaims.length 
-          },
-          ...(user.role === 'ADMIN' ? [
-            { k: 'all', l: t('allPoliciesTab'), n: policies.length },
-            { k: 'claims', l: t('claims'), n: claims.length }
-          ] : user.role === 'ACCOUNTANT' ? [
-            { k: 'claims', l: t('claims'), n: claims.length }
-          ] : [])
+          ...(user.role === 'HR' ? [
+            { k: 'hr_employees', l: locale === 'ar' ? 'الموظفون' : 'Employees', n: employees.length },
+            { k: 'hr_payrolls', l: locale === 'ar' ? 'مسيرات الرواتب' : 'Payrolls', n: payrolls.length },
+            { k: 'hr_departments', l: locale === 'ar' ? 'الأقسام' : 'Departments', n: departments.length },
+          ] : [
+            { 
+              k: 'pending', 
+              l: user.role === 'ADMIN' 
+                ? (locale === 'ar' ? 'بوالص تحتاج إجراء' : 'Policies Needing Action') 
+                : user.role === 'AUDITOR' 
+                  ? (locale === 'ar' ? 'بوالص قيد المراجعة والتدقيق' : 'Policies Awaiting Audit') 
+                  : (locale === 'ar' ? 'تحصيل البوالص' : 'Policies Awaiting Payment'), 
+              n: pending.length 
+            },
+            { 
+              k: 'pending_claims', 
+              l: user.role === 'ADMIN' 
+                ? (locale === 'ar' ? 'مطالبات تحتاج إجراء' : 'Claims Needing Action') 
+                : user.role === 'AUDITOR' 
+                  ? (locale === 'ar' ? 'مطالبات قيد المراجعة والتدقيق' : 'Claims Awaiting Audit') 
+                  : (locale === 'ar' ? 'صرف المطالبات' : 'Claims Awaiting Payment'), 
+              n: pendingClaims.length 
+            },
+            ...(user.role === 'ADMIN' ? [
+              { k: 'all', l: t('allPoliciesTab'), n: policies.length },
+              { k: 'claims', l: t('claims'), n: claims.length }
+            ] : user.role === 'ACCOUNTANT' ? [
+              { k: 'claims', l: t('claims'), n: claims.length }
+            ] : [])
+          ])
         ].map(t => (
           <button key={t.k} onClick={() => setTab(t.k)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', fontSize: '0.9rem', background: tab === t.k ? 'var(--secondary)' : 'rgba(0,0,0,0.05)', color: tab === t.k ? 'white' : 'var(--text-muted)', transition: 'all 0.2s' }}>
             {t.l} ({t.n})
@@ -641,6 +686,154 @@ export default function AdminPanel() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {tab === 'hr_employees' && (
+        <div className="glass-panel" style={{ padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{ margin: 0 }}>{locale === 'ar' ? 'قائمة الموظفين' : 'Employees List'}</h2>
+            <button 
+              onClick={() => router.push('/employees')} 
+              className="btn-primary" 
+              style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold' }}
+            >
+              {locale === 'ar' ? 'إدارة الموظفين ➔' : 'Manage Employees ➔'}
+            </button>
+          </div>
+          {employees.length === 0 ? (
+            <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+              {locale === 'ar' ? 'لا يوجد موظفين مسجلين حالياً' : 'No employees registered'}
+            </p>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0', textAlign: isRtl ? 'right' : 'left', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E2E8F0' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
+                    <th style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: 'bold', borderBottom: '2px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{locale === 'ar' ? 'الاسم الكامل' : 'Full Name'}</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: 'bold', borderBottom: '2px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{locale === 'ar' ? 'القسم' : 'Department'}</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: 'bold', borderBottom: '2px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{locale === 'ar' ? 'رقم الهوية الوطنية' : 'National ID'}</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: 'bold', borderBottom: '2px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{locale === 'ar' ? 'الراتب الأساسي' : 'Basic Salary'}</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: 'bold', borderBottom: '2px solid #E2E8F0' }}>{locale === 'ar' ? 'حساب النظام' : 'System Username'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {employees.map((emp, idx) => (
+                    <tr key={emp.id} style={{ background: idx % 2 === 1 ? 'rgba(0,0,0,0.01)' : 'transparent' }}>
+                      <td style={{ padding: '1rem', fontWeight: 'bold', borderBottom: idx === employees.length - 1 ? 'none' : '1px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{emp.full_name}</td>
+                      <td style={{ padding: '1rem', borderBottom: idx === employees.length - 1 ? 'none' : '1px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{emp.department_name || '—'}</td>
+                      <td style={{ padding: '1rem', borderBottom: idx === employees.length - 1 ? 'none' : '1px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{emp.national_id || '—'}</td>
+                      <td style={{ padding: '1rem', borderBottom: idx === employees.length - 1 ? 'none' : '1px solid #E2E8F0', borderLeft: '1px solid #E2E8F0', color: 'var(--primary)', fontWeight: 'bold' }}>{formatAmount(emp.basic_salary)}</td>
+                      <td style={{ padding: '1rem', borderBottom: idx === employees.length - 1 ? 'none' : '1px solid #E2E8F0' }}>{emp.username || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'hr_payrolls' && (
+        <div className="glass-panel" style={{ padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{ margin: 0 }}>{locale === 'ar' ? 'مسيرات الرواتب' : 'Payroll Registry'}</h2>
+            <button 
+              onClick={() => router.push('/payroll')} 
+              className="btn-primary" 
+              style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold' }}
+            >
+              {locale === 'ar' ? 'إدارة الرواتب ➔' : 'Manage Payroll ➔'}
+            </button>
+          </div>
+          {payrolls.length === 0 ? (
+            <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+              {locale === 'ar' ? 'لا توجد مسيرات رواتب مسجلة حالياً' : 'No payroll records registered'}
+            </p>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0', textAlign: isRtl ? 'right' : 'left', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E2E8F0' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
+                    <th style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: 'bold', borderBottom: '2px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{locale === 'ar' ? 'الموظف' : 'Employee'}</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: 'bold', borderBottom: '2px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{locale === 'ar' ? 'الشهر' : 'Month'}</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: 'bold', borderBottom: '2px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{locale === 'ar' ? 'الصافي المستحق' : 'Net Salary'}</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: 'bold', borderBottom: '2px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{locale === 'ar' ? 'الحالة' : 'Status'}</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: 'bold', borderBottom: '2px solid #E2E8F0' }}>{locale === 'ar' ? 'تاريخ الصرف' : 'Payout Date'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payrolls.map((py, idx) => {
+                    const net = parseFloat(py.basic_salary || '0') + parseFloat(py.bonuses || '0') + parseFloat(py.overtime || '0') - parseFloat(py.social_security || '0') + parseFloat(py.end_of_service || '0');
+                    return (
+                      <tr key={py.id} style={{ background: idx % 2 === 1 ? 'rgba(0,0,0,0.01)' : 'transparent' }}>
+                        <td style={{ padding: '1rem', fontWeight: 'bold', borderBottom: idx === payrolls.length - 1 ? 'none' : '1px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{py.employee_details?.full_name || py.employee_name || '—'}</td>
+                        <td style={{ padding: '1rem', borderBottom: idx === payrolls.length - 1 ? 'none' : '1px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{py.month}</td>
+                        <td style={{ padding: '1rem', borderBottom: idx === payrolls.length - 1 ? 'none' : '1px solid #E2E8F0', borderLeft: '1px solid #E2E8F0', color: 'var(--primary)', fontWeight: 'bold' }}>{formatAmount(net.toString())}</td>
+                        <td style={{ padding: '1rem', borderBottom: idx === payrolls.length - 1 ? 'none' : '1px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>
+                          <span style={{ 
+                            padding: '0.25rem 0.75rem', 
+                            borderRadius: '999px', 
+                            fontSize: '0.8rem', 
+                            color: 'white', 
+                            background: py.status === 'PAID' ? '#10B981' : '#F59E0B', 
+                            fontWeight: 'bold', 
+                            display: 'inline-block' 
+                          }}>
+                            {py.status === 'PAID' ? (locale === 'ar' ? 'تم الصرف' : 'Paid') : (locale === 'ar' ? 'قيد الانتظار' : 'Pending')}
+                          </span>
+                        </td>
+                        <td style={{ padding: '1rem', borderBottom: idx === payrolls.length - 1 ? 'none' : '1px solid #E2E8F0' }}>{py.payout_date || '—'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'hr_departments' && (
+        <div className="glass-panel" style={{ padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{ margin: 0 }}>{locale === 'ar' ? 'أقسام الشركة' : 'Company Departments'}</h2>
+            <button 
+              onClick={() => router.push('/departments')} 
+              className="btn-primary" 
+              style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold' }}
+            >
+              {locale === 'ar' ? 'إدارة الأقسام ➔' : 'Manage Departments ➔'}
+            </button>
+          </div>
+          {departments.length === 0 ? (
+            <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+              {locale === 'ar' ? 'لا توجد أقسام مسجلة حالياً' : 'No departments registered'}
+            </p>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0', textAlign: isRtl ? 'right' : 'left', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E2E8F0' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
+                    <th style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: 'bold', borderBottom: '2px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{locale === 'ar' ? 'اسم القسم' : 'Department Name'}</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: 'bold', borderBottom: '2px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{locale === 'ar' ? 'الوصف' : 'Description'}</th>
+                    <th style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: 'bold', borderBottom: '2px solid #E2E8F0' }}>{locale === 'ar' ? 'تاريخ الإنشاء' : 'Created At'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {departments.map((dep, idx) => (
+                    <tr key={dep.id} style={{ background: idx % 2 === 1 ? 'rgba(0,0,0,0.01)' : 'transparent' }}>
+                      <td style={{ padding: '1rem', fontWeight: 'bold', borderBottom: idx === departments.length - 1 ? 'none' : '1px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{dep.name}</td>
+                      <td style={{ padding: '1rem', borderBottom: idx === departments.length - 1 ? 'none' : '1px solid #E2E8F0', borderLeft: '1px solid #E2E8F0' }}>{dep.description || '—'}</td>
+                      <td style={{ padding: '1rem', borderBottom: idx === departments.length - 1 ? 'none' : '1px solid #E2E8F0' }}>
+                        {dep.created_at ? new Date(dep.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US') : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

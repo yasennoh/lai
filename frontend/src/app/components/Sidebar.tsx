@@ -135,9 +135,9 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         <nav style={{ display: 'flex', flexDirection: 'column', marginBottom: '1.5rem' }}>
           {(!user || user.role !== 'DATA_ENTRY') && renderLink('/', t('dashboard'), GridViewOutlinedIcon)}
-          {user && ['ADMIN', 'AUDITOR', 'ACCOUNTANT'].includes(user.role) && renderLink(
+          {user && ['ADMIN', 'AUDITOR', 'ACCOUNTANT', 'HR'].includes(user.role) && renderLink(
             '/admin-panel', 
-            user.role === 'ADMIN' ? t('staffManagement') : user.role === 'AUDITOR' ? (locale === 'ar' ? 'لوحة التدقيق' : 'Auditor Panel') : (locale === 'ar' ? 'لوحة المحاسبة' : 'Accountant Panel'), 
+            user.role === 'ADMIN' ? t('staffManagement') : user.role === 'AUDITOR' ? (locale === 'ar' ? 'لوحة التدقيق' : 'Auditor Panel') : user.role === 'ACCOUNTANT' ? (locale === 'ar' ? 'لوحة المحاسبة' : 'Accountant Panel') : (locale === 'ar' ? 'لوحة الموارد البشرية' : 'HR Panel'), 
             PeopleAltOutlinedIcon
           )}
         </nav>
@@ -169,13 +169,13 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             {renderLink('/policies', t('policies'), DescriptionOutlinedIcon)}
             {renderLink('/claims', t('claims'), GavelOutlinedIcon)}
             {user && ['ADMIN', 'ACCOUNTANT'].includes(user.role) && renderLink('/reports', t('reports'), BarChartOutlinedIcon)}
-            {user && ['ADMIN', 'ACCOUNTANT'].includes(user.role) && renderLink('/payroll', t('payroll'), AccountBalanceWalletOutlinedIcon)}
+            {user && ['ADMIN', 'ACCOUNTANT', 'HR'].includes(user.role) && renderLink('/payroll', t('payroll'), AccountBalanceWalletOutlinedIcon)}
             {user && ['ADMIN', 'ACCOUNTANT'].includes(user.role) && renderLink('/expenses', t('expenses'), ReceiptLongOutlinedIcon)}
           </nav>
         </div>
 
         {/* HR Management Section */}
-        {user?.role === 'ADMIN' && (
+        {user && ['ADMIN', 'HR'].includes(user.role) && (
           <div style={{ marginBottom: '1.5rem' }}>
             {isOpen && (
               <div style={{ padding: '0 1rem', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-muted)', textTransform: 'uppercase' }}>

@@ -36,3 +36,12 @@ if not User.objects.filter(username='accountant').exists():
 else:
     print('Accountant already exists')
 
+# Create HR
+if not User.objects.filter(username='hr').exists():
+    u = User.objects.create_user('hr', 'hr@company.com', 'hr123')
+    UserProfile.objects.create(user=u, role='HR')
+    print('HR created: hr / hr123')
+else:
+    print('HR already exists')
+
+

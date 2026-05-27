@@ -49,6 +49,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       setUserObj(parsedUser);
       if (parsedUser.role === 'DATA_ENTRY' && pathname === '/') {
         router.push('/data-entry');
+      } else if (parsedUser.role === 'HR' && pathname === '/') {
+        router.push('/admin-panel');
       } else {
         setIsAuthenticated(true);
       }
