@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from './LanguageContext';
-import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
+import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
@@ -134,7 +134,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         <nav style={{ display: 'flex', flexDirection: 'column', marginBottom: '1.5rem' }}>
-          {(!user || user.role !== 'DATA_ENTRY') && renderLink('/', t('dashboard'), DashboardOutlinedIcon)}
+          {(!user || user.role !== 'DATA_ENTRY') && renderLink('/', t('dashboard'), GridViewOutlinedIcon)}
           {user?.role === 'ADMIN' && renderLink('/admin-panel', t('staffManagement'), PeopleAltOutlinedIcon)}
         </nav>
 
