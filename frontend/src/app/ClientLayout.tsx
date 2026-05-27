@@ -6,6 +6,25 @@ import Sidebar from './components/Sidebar';
 import { useLanguage } from './components/LanguageContext';
 import { useTheme } from './components/ThemeContext';
 
+const ROUTE_PERMISSIONS: Record<string, string[]> = {
+  '/': ['ADMIN', 'AUDITOR', 'ACCOUNTANT'],
+  '/admin-panel': ['ADMIN', 'AUDITOR', 'ACCOUNTANT', 'HR'],
+  '/crm': ['ADMIN', 'DATA_ENTRY', 'AUDITOR', 'ACCOUNTANT'],
+  '/leads': ['ADMIN', 'DATA_ENTRY', 'AUDITOR', 'ACCOUNTANT'],
+  '/reminders': ['ADMIN', 'DATA_ENTRY', 'AUDITOR', 'ACCOUNTANT'],
+  '/data-entry': ['ADMIN', 'DATA_ENTRY'],
+  '/policies': ['ADMIN', 'DATA_ENTRY', 'AUDITOR', 'ACCOUNTANT'],
+  '/claims': ['ADMIN', 'DATA_ENTRY', 'AUDITOR', 'ACCOUNTANT'],
+  '/reports': ['ADMIN', 'ACCOUNTANT'],
+  '/payroll': ['ADMIN', 'ACCOUNTANT', 'HR'],
+  '/expenses': ['ADMIN', 'ACCOUNTANT'],
+  '/employees': ['ADMIN', 'HR'],
+  '/departments': ['ADMIN', 'HR'],
+  '/templates': ['ADMIN'],
+  '/settings': ['ADMIN'],
+  '/brokers': ['ADMIN']
+};
+
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -17,6 +36,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const [userObj, setUserObj] = useState<any>(null);
+
+  const handleUnauthorizedRedirect = (role: string) => {
+    if (role === 'DATA_ENTRY') {
+      router.push('/data-entry');
+    } else if (role === 'HR') {
+      router.push('/admin-panel');
+    } else if (['ADMIN', 'AUDITOR', 'ACCOUNTANT'].includes(role)) {
+      router.push('/');
+    } else {
+      router.push('/login');
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -47,12 +78,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       localStorage.setItem('user', JSON.stringify(parsedUser));
 
       setUserObj(parsedUser);
-      if (parsedUser.role === 'DATA_ENTRY' && pathname === '/') {
-        router.push('/data-entry');
-      } else if (parsedUser.role === 'HR' && pathname === '/') {
-        router.push('/admin-panel');
+      
+      const allowedRoles = ROUTE_PERMISSIONS[pathname];
+      if (allowedRoles && !allowedRoles.includes(parsedUser.role)) {
+        handleUnauthorizedRedirect(parsedUser.role);
       } else {
-        setIsAuthenticated(true);
+        if (parsedUser.role === 'DATA_ENTRY' && pathname === '/') {
+          router.push('/data-entry');
+        } else if (parsedUser.role === 'HR' && pathname === '/') {
+          router.push('/admin-panel');
+        } else {
+          setIsAuthenticated(true);
+        }
       }
     }
   }, [pathname, router]);
@@ -152,7 +189,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     );
   }
 
-  if (!userObj) return null;
+  if (!userObj || !isAuthenticated) return null;
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--background)' }}>

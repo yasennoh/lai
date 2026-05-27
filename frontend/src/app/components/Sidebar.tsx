@@ -143,36 +143,40 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         </nav>
 
         {/* Client Management Section */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          {isOpen && (
-            <div style={{ padding: '0 1rem', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              {locale === 'ar' ? 'إدارة العملاء' : 'Client Management'}
-            </div>
-          )}
-          <nav style={{ display: 'flex', flexDirection: 'column' }}>
-            {renderLink('/crm', t('customers'), PersonOutlinedIcon)}
-            {renderLink('/leads', t('leads'), PersonAddOutlinedIcon)}
-            {user?.role === 'ADMIN' && renderLink('/brokers', t('brokers'), HandshakeOutlinedIcon)}
-            {renderLink('/reminders', locale === 'ar' ? 'وثائق تنتهي قريباً' : 'Expiring Policies', NotificationsActiveOutlinedIcon)}
-          </nav>
-        </div>
+        {user && ['ADMIN', 'DATA_ENTRY', 'AUDITOR', 'ACCOUNTANT'].includes(user.role) && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            {isOpen && (
+              <div style={{ padding: '0 1rem', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                {locale === 'ar' ? 'إدارة العملاء' : 'Client Management'}
+              </div>
+            )}
+            <nav style={{ display: 'flex', flexDirection: 'column' }}>
+              {renderLink('/crm', t('customers'), PersonOutlinedIcon)}
+              {renderLink('/leads', t('leads'), PersonAddOutlinedIcon)}
+              {user.role === 'ADMIN' && renderLink('/brokers', t('brokers'), HandshakeOutlinedIcon)}
+              {renderLink('/reminders', locale === 'ar' ? 'وثائق تنتهي قريباً' : 'Expiring Policies', NotificationsActiveOutlinedIcon)}
+            </nav>
+          </div>
+        )}
 
         {/* Operations Section */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          {isOpen && (
-            <div style={{ padding: '0 1rem', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              {locale === 'ar' ? 'العمليات والتأمين' : 'Operations & Insurance'}
-            </div>
-          )}
-          <nav style={{ display: 'flex', flexDirection: 'column' }}>
-            {renderLink('/data-entry', t('dataEntry'), BadgeOutlinedIcon)}
-            {renderLink('/policies', t('policies'), DescriptionOutlinedIcon)}
-            {renderLink('/claims', t('claims'), GavelOutlinedIcon)}
-            {user && ['ADMIN', 'ACCOUNTANT'].includes(user.role) && renderLink('/reports', t('reports'), BarChartOutlinedIcon)}
-            {user && ['ADMIN', 'ACCOUNTANT', 'HR'].includes(user.role) && renderLink('/payroll', t('payroll'), AccountBalanceWalletOutlinedIcon)}
-            {user && ['ADMIN', 'ACCOUNTANT'].includes(user.role) && renderLink('/expenses', t('expenses'), ReceiptLongOutlinedIcon)}
-          </nav>
-        </div>
+        {user && ['ADMIN', 'DATA_ENTRY', 'AUDITOR', 'ACCOUNTANT', 'HR'].includes(user.role) && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            {isOpen && (
+              <div style={{ padding: '0 1rem', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                {locale === 'ar' ? 'العمليات والتأمين' : 'Operations & Insurance'}
+              </div>
+            )}
+            <nav style={{ display: 'flex', flexDirection: 'column' }}>
+              {['ADMIN', 'DATA_ENTRY'].includes(user.role) && renderLink('/data-entry', t('dataEntry'), BadgeOutlinedIcon)}
+              {['ADMIN', 'DATA_ENTRY', 'AUDITOR', 'ACCOUNTANT'].includes(user.role) && renderLink('/policies', t('policies'), DescriptionOutlinedIcon)}
+              {['ADMIN', 'DATA_ENTRY', 'AUDITOR', 'ACCOUNTANT'].includes(user.role) && renderLink('/claims', t('claims'), GavelOutlinedIcon)}
+              {['ADMIN', 'ACCOUNTANT'].includes(user.role) && renderLink('/reports', t('reports'), BarChartOutlinedIcon)}
+              {['ADMIN', 'ACCOUNTANT', 'HR'].includes(user.role) && renderLink('/payroll', t('payroll'), AccountBalanceWalletOutlinedIcon)}
+              {['ADMIN', 'ACCOUNTANT'].includes(user.role) && renderLink('/expenses', t('expenses'), ReceiptLongOutlinedIcon)}
+            </nav>
+          </div>
+        )}
 
         {/* HR Management Section */}
         {user && ['ADMIN', 'HR'].includes(user.role) && (
