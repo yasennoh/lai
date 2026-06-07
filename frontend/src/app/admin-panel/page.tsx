@@ -419,9 +419,9 @@ export default function AdminPanel() {
             { 
               k: 'pending', 
               l: user.role === 'ADMIN' 
-                ? (locale === 'ar' ? 'بوالص تحتاج إجراء' : 'Policies Needing Action') 
+                ? (locale === 'ar' ? 'وثائق تحتاج إجراء' : 'Policies Needing Action') 
                 : user.role === 'AUDITOR' 
-                  ? (locale === 'ar' ? 'بوالص قيد المراجعة والتدقيق' : 'Policies Awaiting Audit') 
+                  ? (locale === 'ar' ? 'وثائق قيد المراجعة والتدقيق' : 'Policies Awaiting Audit') 
                   : (locale === 'ar' ? 'تحصيل البوالص' : 'Policies Awaiting Payment'), 
               n: pending.length 
             },
