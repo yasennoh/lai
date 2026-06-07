@@ -37,7 +37,7 @@ export default function Login() {
     <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)' }}>
       <div style={{ width: '100%', maxWidth: '420px', padding: '2.5rem', borderRadius: '20px', background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 25px 50px rgba(0,0,0,0.3)' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}></div>
+          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🛡️</div>
           <h1 style={{ color: 'white', fontSize: '1.4rem', marginBottom: '0.3rem' }}>insurance Software Solutions</h1>
           <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>تسجيل الدخول</p>
         </div>
